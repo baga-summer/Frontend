@@ -195,6 +195,20 @@ const calculations = {
 		let loss = koef * ((speed * speed)/2*9.81);
 
 		return loss;
+	},
+
+	pipeBend: (bendCircum, innerDiameter, speed) => {
+		let koef = 0;
+
+		if (bendCircum > (4 * innerDiameter)) {
+			koef = 0.2;
+		} else if (bendCircum == innerDiameter) {
+			koef = 0.4;
+		}
+
+		let loss = koef * ((speed * speed)/2*9.81);
+
+		return loss;
 	}
 
 };
