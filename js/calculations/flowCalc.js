@@ -252,7 +252,7 @@ function calcAll() {
             document.getElementById("staticPressure").innerText = height;
         }
 
-        alert("Ger ej ett dugligt värde");
+	alert("Ger ej ett dugligt värde");
     } else {
         document.getElementById("staticPressure").innerText = height;
         document.getElementById("flowSpeed").innerText = roundVel;
@@ -481,45 +481,5 @@ const checkValidLogin = async () => {
         }
     }
 };
-
-
-/*
- * Calculates the additional pressure loss when a pipe changes its diameter.
- *
- * @param {INTEGER} Value that represents size of the pipe before the joint.
- * @param {INTEGER} Value that represents size of the pipe after the joint.
- * @param {INTEGER} Value that represents the speed of fluid in the pipe before the
- *                  t-connection.
- * @return {INTEGER} Value that represents the additional pressure loss because
- *                   of the connection.
- * The formula was found at https://www.pumpportalen.se/pumphandboken/11-2-rorstromningsforluster/
- * */
-const sizeLoss(firstSize, secondSize, speed) => {
-	let koef = 0;
-	let factor = secondSize / firstSize;
-	if (firstSize < secondSize) {
-		if (factor <= 1.5) {
-			koef = 0.3;
-		} elif (factor <= 2) {
-			koef = 0.6;
-		} elif (factor <= 2.5) {
-			koef = 0.7;
-		} elif (factor <= 10) {
-			koef = 1;
-		}
-	} else {
-		if (factor <= 0.4) {
-			koef = 0.4;
-		} elif (factor <= 0.6) {
-			koef = 0.3;
-		} elif (factor <= 0.8) {
-			koef = 0.2;
-		} elif (factor <= 1) {
-			koef = 0;
-		}
-	}
-	let loss = koef * ((speed * speed)/2*9.81)
-	return loss
-}
 
 checkValidLogin();
