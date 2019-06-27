@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="sv" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+		<title>Home</title>
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400" rel="stylesheet">
+		<link rel="stylesheet" href="css/master.css">
+		<link rel="stylesheet" href="css/home.css">
+		<script src="js/configVariables.js" charset="utf-8"></script>
+		<script src="js/APIMiddleware.js" charset="utf-8"></script>
+		<script src="js/projects/home.js"></script>
+		<script src="js/login/logout.js"></script>
+	</head>
+	<body>
+		<div class="topnav">
+			<div class="links">
+				<a class="active" href="home.html">Hem</a>
+				<a href="calculations.html">Beräkningar</a>
+				<a href="listProducts.html">Produkter</a>
+				<span id="extraLinks"></span>
+				<a href="changepassword.html">Byt lösenord</a>
+				<a id="logout" href="#logout">Logga ut</a>
+			</div>
+			<div class="greet-user">
+				<span id="userName"></span>
+				<a class="helpicon" href="user-guide.pdf" target="_blank">
+                    <i class="material-icons">help_outline</i>
+                </a>
+			</div>
+		</div>
+		<div class="wrap">
+			<h1 class="title">Baga Aqua System</h1>
+			<div class="projectlist"></div>
+			<br><br>
+			<div class="button-wrap">
+				<a href="newproject.html" class="button">Nytt projekt</a>
+			</div>
+		</div>
+	</body>
+</html>

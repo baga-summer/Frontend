@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="sv" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <meta charset="utf-8">
+        <title>Registrera - Baga Aqua System</title>
+        <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400" rel="stylesheet">
+        <link rel="stylesheet" href="css/master.css">
+        <link rel="stylesheet" href="css/login.css">
+        <script src="js/APIMiddleware.js" charset="utf-8"></script>
+    </head>
+    <body>
+        <div class="wrap">
+            <h1 class="title">Baga Aqua System</h1>
+            <h2>Registrera / Återställa lösenord</h2>
+            <div class="error-wrap" id="error-holder"></div>
+            <div class="form-field">
+                <form id="register-form">
+                    <input class="text-input" type="text" name="username" placeholder="Epost">
+                    <br><br>
+                    <input class="text-input" type="text" name="oneTimeKey" placeholder="Återställningskod">
+                    <br><br>
+                    <input id="pass" class="text-input" type="password" name="newPassword" placeholder="Nytt lösenord">
+                    <br><br>
+                    <input id="confirmpass" class="text-input" type="password" name="confirmNewPassword" placeholder="Bekräfta nytt lösenord">
+                    <br><br><br>
+                    <a id="register-bt" class="login-bt button" type="button" name="login-bt" href="#">Uppdatera</a>
+                </form>
+            </div>
+            <br><br>
+            <a class="small-link" href="/">Tillbaka till inloggning</a>
+        </div>
+        <script src="js/configVariables.js" charset="utf-8"></script>
+        <script src="js/login/register.js" charset="utf-8"></script>
+    </body>
+</html>

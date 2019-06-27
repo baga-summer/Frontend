@@ -1,0 +1,128 @@
+.admin-menu {
+    width: 75%;
+    margin: auto;
+    /* background: #f1f1f1; */
+    /* border-radius: 10px; */
+}
+
+.nav-ul {
+    display: flex;
+    justify-content: center;
+    /* justify-content: space-around; */
+    list-style: none;
+}
+
+.nav-link {
+    background: #f1f1f1;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    color: #1280c4;
+}
+
+.nav-link:hover {
+    background: #1280c4;
+    color: #fff;
+}
+
+.selected {
+    background: #1280c4;
+    color: #fff;
+}
+
+.admin-active {
+    background-color: #1280c4;
+    color: #fff !important;
+}
+
+.admin-active:hover {
+    background-color: #1280c4 !important;
+    color: #fff !important;
+}
+
+.admin-content {
+    margin: 1rem 2rem;
+    padding: 1.5rem;
+    background: #f1f1f1;
+}
+
+.new-user-form {
+    width: 80%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.email-create-user {
+    margin: 1rem auto;
+    width: 75%;
+}
+
+.bt-create-user {
+    width: 100%;
+    margin: 1rem auto;
+    text-align: center;
+}
+
+.checkbox-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.slim-title {
+    font-weight: 200;
+}
+
+.pending-items {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.item-image {
+    padding: 1rem;
+}
+
+.item-text-wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.item-title,
+.item-category {
+    margin: 0.2rem 0;
+    font-weight: normal;
+}
+
+.item-title {
+    font-size: 1.4rem;
+}
+
+.item-category {
+    font-size: 1.1rem;
+}
+
+.item-approve,
+.item-deny,
+.item-disable {
+    cursor: pointer;
+}
+
+.error-wrap {
+    width: 80%;
+    margin: auto;
+    padding-top: 2rem;
+}
+
+.userRow {
+    padding: 1rem 0;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #888;
+}
+
+.orgadm {
+    color: #aaa;
+    border-bottom: none;
+}

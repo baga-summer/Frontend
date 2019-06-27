@@ -1,0 +1,40 @@
+.wrap {
+    width: 90%;
+    margin: auto;
+    font-family: 'Fira Sans', sans-serif;
+}
+
+.select-input {
+    width: 100%;
+}
+
+.text-input {
+    width: 96.3%;
+}
+
+.newKey,
+.newInput {
+    width: 34%;
+}
+
+.newField {
+    margin-top: 1rem;
+}
+
+.main-wrap {
+    margin: auto;
+    width: 60%;
+}
+
+img {
+    max-width: 7rem;
+}
+
+canvas {
+    width: 100%;
+    height: auto;
+}
+
+.button-wrap {
+    margin: 2rem 0;
+}

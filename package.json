@@ -1,0 +1,33 @@
+{
+  "name": "vattenbagarna-frontend",
+  "version": "1.0.0",
+  "description": "# Workflow - clone the repo `git@github.com:vattenbagarna/Frontend.git` - install npm modules (this is required for code linting) `npm install` - code - run `npm test` to run linters etc. - create a branch, commit and push to it - Create pull request to merge with master",
+  "main": "index.html",
+  "scripts": {
+    "test": "./testing/tests.sh",
+    "lint-hook": "./testing/auto_lint.sh",
+    "lint": "./node_modules/.bin/eslint ./",
+    "lint-fix": "./node_modules/.bin/eslint --fix ./"
+  },
+  "precommit.silent": false,
+  "precommit.colors": true,
+  "pre-commit": [
+    "lint-hook"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vattenbagarna/Frontend.git"
+  },
+  "author": "Vattenbagarna",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/vattenbagarna/Frontend/issues"
+  },
+  "homepage": "https://github.com/vattenbagarna/Frontend#readme",
+  "dependencies": {
+    "eslint": "^5.14.1"
+  },
+  "devDependencies": {
+    "pre-commit": "^1.2.2"
+  }
+}

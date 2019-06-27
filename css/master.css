@@ -1,0 +1,238 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    font-family: 'Fira Sans', sans-serif;
+}
+
+/*
+    Navbar style
+*/
+.topnav {
+    width: 100%;
+    background: #f1f1f1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+}
+
+.greet-user {
+    padding: 0 1rem;
+    display: flex;
+}
+
+.helpicon {
+    padding: 0 0 0 10px;
+    color: #1280c4;
+}
+
+.topnav .links {
+    display: flex;
+    align-items: center;
+}
+
+.topnav .links a {
+    padding: 1rem;
+    height: 100%;
+    color: black;
+    text-align: center;
+    text-decoration: none;
+}
+
+.topnav .links a:hover {
+    background-color: #ddd;
+}
+
+.topnav .links a.active {
+    background-color: #1280c4;
+    color: white;
+}
+
+/*
+    General Title style
+*/
+.title {
+    margin: 0;
+    padding: 3rem 0;
+    font-size: 3rem;
+    font-weight: 300;
+    text-align: center;
+}
+
+/*
+    General link style
+*/
+.small-link {
+    color: #1280c4;
+    text-decoration: none;
+    border-bottom: 1px solid #1280c4;
+}
+
+/*
+    General link hover style
+*/
+.small-link:hover {
+    border-bottom: 1px solid #1280c4;
+}
+
+/*
+    Popup boxes colors
+*/
+.error-msg {
+    padding: 1rem;
+    /* border-radius: 8px; */
+    color: #fff;
+    background: #c0392b;
+    cursor: pointer;
+}
+
+.ok-msg {
+    padding: 1rem;
+    /* border-radius: 8px; */
+    color: #fff;
+    background: #27ae60;
+    cursor: pointer;
+}
+
+/*
+    General larger button style
+*/
+.button {
+    /* margin: auto; */
+    padding: 1rem 1.5rem;
+    border: 2px solid #1280c4;
+    /* border-radius: 5px; */
+    font-size: 1.1rem;
+    color: #fff;
+    background: #1280c4;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.button:hover {
+    background: #fff;
+    color: #1280c4;
+    border: 2px solid #1280c4;
+    cursor: pointer;
+}
+
+/*
+    Disabled/Inactive button style
+*/
+.disabled {
+    padding: 1rem 1.5rem;
+    border: 2px solid #666;
+    /* border-radius: 5px; */
+    font-size: 1.1rem;
+    color: #fff;
+    background: #666;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+/*
+    Warning style for buttons
+*/
+.danger-bt {
+    border: 2px solid #c0392b;
+    color: #fff;
+    background: #c0392b;
+}
+
+.danger-bt:hover {
+    background: #fff;
+    color: #c0392b;
+    border: 2px solid #c0392b;
+    cursor: pointer;
+}
+
+/*
+    Gebneral small button
+*/
+.small-button {
+    padding: 0.4rem 0.6rem;
+}
+
+/*
+    General text input field
+*/
+.text-input {
+    font-size: 1.1rem;
+    padding: 0.6rem;
+    border: 3px solid #1280c4;
+    /* border-radius: 5px; */
+    background: #fff;
+    color: #1280c4;
+}
+
+/*
+    General dropdown input
+*/
+.select-input {
+    padding: 0.4rem;
+    color: #1280c4;
+    background: #fff;
+    border: solid 2px #1280c4;
+    /* border-radius: 5px; */
+}
+
+/*
+    select dropdown Option
+*/
+option {
+    font-size: 0.9rem;
+    background-color: #fff;
+    color: #1280c4;
+}
+
+/*
+    General number input
+*/
+.number-input {
+    padding: 0.4rem;
+    background: #fff;
+    color: #1280c4;
+    border: solid 2px #1280c4;
+    /* border-radius: 5px; */
+}
+
+.number-input:disabled {
+    background: #dddddd;
+}
+
+/*
+    General table logic layout
+*/
+.table {
+    text-align: center;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid rgba(0, 0, 0, 0.5);
+    transition: 0.2s;
+}
+
+.tablepart {
+    font-weight: 200;
+    /* width: 20%; */
+    margin: auto;
+    flex-grow: 0;
+}
+
+/*
+    Readonly state of input
+*/
+.readonly {
+    color: #728b9a;
+    border: solid 2px #728b9a;
+    background: rgba(114, 139, 154, 0.2);
+}
+
+.left-right-space {
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+}

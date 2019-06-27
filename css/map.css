@@ -1,0 +1,500 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.wrap-all {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    font-family: 'Fira Sans', sans-serif;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 22%;
+    min-width: 350px;
+    height: 100%;
+    text-align: center;
+    border-right: 2px solid #1280c4;
+}
+
+.side-header {
+    padding: 20px 0;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    border-bottom: 1px solid #1280c4;
+}
+
+.arrow {
+    padding: 0.2rem;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #1280c4;
+}
+
+.map {
+    width: 78%;
+}
+
+.projekt-titel {
+    max-height: 3vh;
+    margin: 0;
+    padding-left: 5px;
+    font-weight: 300;
+    color: black;
+    background: white;
+}
+
+.buttons {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: space-around;
+    min-height: 3rem;
+    padding: 0.8rem;
+    background: #fff;
+    border-top: 1px #eee solid;
+}
+
+.low-button {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem auto;
+}
+
+.desc {
+    text-align: left;
+    padding: 1rem;
+    font-weight: 300;
+}
+
+.obj-list {
+    height: 80vh;
+    overflow-y: scroll;
+    outline: 0;
+}
+
+.obj-list::-webkit-scrollbar {
+    width: 0.5em;
+}
+
+.obj-list::-webkit-scrollbar-track {
+    background: #0c6399;
+}
+
+.obj-list::-webkit-scrollbar-thumb {
+    background: #2794d8;
+}
+
+.obj-row {
+    display: flex;
+    justify-content: space-around;
+    background-color: #1280c4;
+}
+
+.obj-list button::-moz-focus-inner {
+    border: none;
+}
+
+.accordion {
+    width: 100%;
+    padding: 1.5rem;
+    color: #fff;
+    background: #1280c4;
+    cursor: pointer;
+    font-weight: 400;
+    font-size: 1rem;
+    border: none;
+}
+
+.activeAccordion, .accordion:hover {
+    background-color: light#1280c4;
+}
+
+.accordion:after {
+    content: '+';
+    color: #fff;
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+}
+
+.activeAccordion:after {
+    content: "\2212";
+}
+
+.panel {
+    background: #eee;
+    padding: 1px 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+}
+
+.obj-container {
+    width: 100%;
+    height: 120px;
+    margin: 0.3rem 0;
+    background: #fff;
+    display: flex;
+    text-align: left;
+    cursor: pointer;
+    outline: none;
+    font-size: 15px;
+    color: #444;
+    border-top: 1px solid rgba(255, 255, 255, 0);
+    border-bottom: 1px solid rgba(255, 255, 255, 0);
+}
+
+.obj:hover {
+    cursor: pointer;
+}
+
+.obj img {
+    max-height: 88%;
+    max-width: 80px !important;
+    align-self: center;
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    display: block;
+}
+
+.obj-icon {
+    padding: 0.8rem;
+    font-size: 2.2rem;
+    align-self: center;
+}
+
+.obj-desc {
+    margin: auto 0;
+}
+
+.tools {
+    margin: 1rem;
+    height: 60px;
+    min-width: 3.5rem;
+    background-color: #fff;
+    box-shadow: 1px 1px 4px rgba(102, 102, 102, 0.4);
+    border-radius: 5px;
+    border: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tools i {
+    font-size: 2.5rem;
+    padding-left: 0.5rem;
+}
+
+.leaflet-control-custom {
+    background-color: white;
+    width: 30px;
+    height: 30px;
+}
+
+.leaflet-control-custom:hover {
+    cursor: pointer;
+}
+
+.leaflet-control-custom i {
+    font-size: 30px;
+    color: #696969;
+}
+
+.leaflet-popup-content-wrapper {
+    min-width: 170px;
+}
+
+.leaflet-popup-content-wrapper .select-input,
+.leaflet-popup-content-wrapper .number-input,
+.leaflet-popup-content-wrapper .text-input,
+#versions,
+#newVersion,
+#tilt,
+.material,
+.dimension {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.active {
+    border-top: 1px solid #1280c4;
+    border-bottom: 1px solid #1280c4;
+    box-shadow: 0 0 4px #1280c4;
+}
+
+.active2, .active3 {
+    border: 2px solid #1280c4 !important;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 20%;
+}
+
+.loading {
+    animation: spin 1s linear infinite;
+    text-align: center;
+    margin: auto;
+    width: 100%;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.elevation {
+    display: none;
+}
+
+.close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.alert {
+    position: relative;
+    top: 0%;
+    width: 100%;
+    z-index: 9999;
+    padding: 20px;
+    background-color: rgba(244, 67, 54, 0.8);
+    font-size: 18px;
+    color: white;
+    opacity: 1;
+    transition: opacity 0.6s;
+    margin-bottom: 5px;
+}
+
+.warning-icon {
+    border: 2px solid #ff9800;
+    border-radius: 50%;
+}
+
+.alert-icon {
+    border: 2px solid #f44336;
+    border-radius: 50%;
+}
+
+.alert .info-text {
+    float: right;
+    margin-right: 20px;
+}
+
+.alert.success {
+    background-color: rgba(76, 175, 80, 0.8);
+}
+
+.alert.warning {
+    background-color: rgba(255, 152, 0, 0.8);
+}
+
+.closebtn {
+    margin-right: 40px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.closebtn:hover {
+    color: black;
+}
+
+ul.accordion2 {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul.accordion2 label+input[type='radio'] {
+    display: none;
+}
+
+ul.accordion2 li {
+    border-bottom: 1px solid #DDDDDD;
+}
+
+ul.accordion2 label {
+    background: #1280c4;
+    color: #fff;
+    display: block;
+    padding: 10px;
+}
+
+ul.accordion2 label:hover {
+    cursor: pointer;
+}
+
+ul.accordion2 div.content {
+    overflow: hidden;
+    display: none;
+}
+
+ul.accordion2 label+input[type='radio']:checked+div.content {
+    display: block;
+}
+
+ul.accordion2 table {
+    border-spacing: 0;
+    border: none;
+    width: 100%;
+    border: 1px solid #ddd;
+    background-color: white;
+    table-layout: fixed;
+}
+
+ul.accordion2 th {
+    background-color: #3867d6;
+    color: white;
+}
+
+ul.accordion2 th, td {
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    padding: 0.8rem 0;
+    width: 15vw;
+}
+
+ul.accordion2 img {
+    max-width: 15vw;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2
+}
+
+.connect-icon {
+    border: 2px solid black;
+    border-radius: 50%;
+}
+
+.transparent-border {
+    border: 2px solid transparent;
+    border-radius: 50%;
+}
+
+.polygon-stroke {
+    stroke: black;
+    stroke-width: 3px;
+}
+
+#snackbar {
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+    padding: 16px;
+    position: fixed;
+    z-index: 9999;
+    left: 50%;
+    bottom: 30px;
+    font-family: 'Fira Sans', sans-serif;
+}
+
+#snackbar.show {
+    visibility: visible;
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+#snackbar.showSave {
+    visibility: visible;
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    color: #fff !important;
+}
+
+@-webkit-keyframes fadein {
+    from {
+        bottom: 0;
+        opacity: 0;
+    }
+
+    to {
+        bottom: 30px;
+        opacity: 1;
+    }
+}
+
+@keyframes fadein {
+    from {
+        bottom: 0;
+        opacity: 0;
+    }
+
+    to {
+        bottom: 30px;
+        opacity: 1;
+    }
+}
+
+@-webkit-keyframes fadeout {
+    from {
+        bottom: 30px;
+        opacity: 1;
+    }
+
+    to {
+        bottom: 0;
+        opacity: 0;
+    }
+}
+
+@keyframes fadeout {
+    from {
+        bottom: 30px;
+        opacity: 1;
+    }
+
+    to {
+        bottom: 0;
+        opacity: 0;
+    }
+}

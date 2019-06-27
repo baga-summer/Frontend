@@ -1,0 +1,53 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.printMap {
+    width: 100%;
+    height: 100%;
+}
+
+table {
+    border-spacing: 0;
+    border: none;
+    width: 100%;
+    border: 1px solid #ddd;
+    table-layout: fixed;
+}
+
+th {
+    background-color: #3867d6;
+    color: white;
+}
+
+th, td {
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    padding: 0.8rem 0;
+    width: 15vw;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2
+}
+
+.right {
+    text-align: right;
+    width: 100%;
+}
+
+@media print {
+    table {
+        border: none !important;
+    }
+
+    .pre-print-display {
+        display: none;
+        content: "";
+        visibility: hidden;
+    }
+}

@@ -1,0 +1,20 @@
+.wrap {
+    margin: auto;
+    text-align: center;
+}
+
+.error-wrap {
+    padding: 1rem;
+}
+
+.login-label {
+    display:run-in;
+}
+
+.text-input {
+    min-width: 350px;
+}
+
+.login-helpers {
+    margin: 1.5rem 0;
+}

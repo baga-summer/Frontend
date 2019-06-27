@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="sv" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>Karta</title>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400" rel="stylesheet">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"/>
+        <link rel="stylesheet" href="css/master.css">
+        <link rel="stylesheet" href="css/map.css">
+        <script src="js/vendor/leaflet.js"></script>
+        <script type="module" src="js/map/loadLeafletMap.js"></script>
+        <script type="module" src="js/map/show.js"></script>
+        <script type="module" src="js/map/edit.js"></script>
+        <script type="module" src="js/map/pipes.js"></script>
+        <script src="js/configVariables.js" charset="utf-8"></script>
+        <script src="js/APIMiddleware.js" charset="utf-8"></script>
+        <script src="js/calculations/exportCalc.js" charset="utf-8"></script>
+        <script type="text/javascript" src="js/vendor/leaflet.geometryutil.js"></script>
+        <script type="text/javascript" src="js/vendor/leaflet-draggable-polyline.js"></script>
+        <script src="js/vendor/esri-leaflet.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/esri-leaflet-geocoder/dist/esri-leaflet-geocoder.css">
+        <script src="js/vendor/esri-leaflet-geocoder.js"></script>
+        <script src="https://unpkg.com/leaflet.gridlayer.googlemutant@latest/Leaflet.GoogleMutant.js"></script>
+		<script src="js/vendor/leaflet.polylineDecorator.js"></script>
+    </head>
+    <body>
+        <div class="wrap-all">
+            <div class="sidebar">
+                <div class="wrap-items">
+                    <span class="side-header">
+                        <a class="arrow" href="home.html"><span class="material-icons">arrow_back</span></a>
+                        <h2 class="projekt-titel"></h2>
+                    </span>
+                    <div class="obj-list">
+                        <button class="accordion desc">Verktyg</button>
+                        <div class="panel">
+                            <div class="obj-container" id="stempipe">
+                                <div class="obj obj-icon">
+                                    <i class="material-icons obj-icon">transform</i>
+                                </div>
+                                <div class="obj-desc">
+                                    Placera stamledningar
+                                </div>
+                            </div>
+                            <div class="obj-container" id="pipe">
+                                <div class="obj obj-icon">
+                                    <i class="material-icons obj-icon">transform</i>
+                                </div>
+                                <div class="obj-desc">
+                                    Placera ledningar
+                                </div>
+                            </div>
+                            <div class="obj-container" id="house">
+                                <div class="obj obj-icon">
+                                    <i class="material-icons obj-icon">home</i>
+                                </div>
+                                <div class="obj-desc">
+                                    Placera byggnader
+                                </div>
+                            </div>
+							<div class="obj-container">
+                                <div id="Förgrening" class="obj obj-icon Förgrening">
+                                    <i class="material-icons obj-icon">adjust</i>
+                                </div>
+                                <div class="obj-desc">
+                                    Placera förgrening
+                                </div>
+                            </div>
+                            <div class="obj-container">
+                                <div id="Utsläppspunkt" class="obj obj-icon Utsläppspunkt">
+                                    <i class="material-icons obj-icon">explicit</i>
+                                </div>
+                                <div class="obj-desc">
+                                    Placera slutpunkt
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+				<div class="buttons">
+						<a id="showMateriallist" class="button low-button">
+							<span>Visa materiallista</span>
+							<i class="material-icons">chevron_right</i>
+						</a>
+                        <a id="save" class="button low-button">
+                            Spara
+                        </a>
+				</div>
+            </div>
+            <div class="map" id="myMap"></div>
+        </div>
+		<div id="readBack"></div>
+		<div id="pipeModal" class="modal">
+			<div class="modal-content">
+				<span class="close">&times;</span>
+				<b>Rör</b>
+				<br></br>
+				<label>Material</label><br>
+				<select class="material select-input">
+					<option>PEM</option>
+					<option>PE</option>
+					<option>Rostfria</option>
+				</select>
+				<div id="loading">
+					<i class="material-icons loading">autorenew</i>
+				</div>
+				<div class="elevation" id="elevation">
+                    <br>
+					<label>Statisk höjd</label>
+					<input class="number-input" type="number" step="0.1" id="tilt" name="tilt">
+                    <br><br>
+					<input class="button" type="button" id="pipeSpecifications" value="Skicka">
+				</div>
+			</div>
+		</div>
+		<div id="saveModal" class="modal">
+			<div class="modal-content">
+				<span class="close">&times;</span>
+				<b id="projectNameInSave"></b>
+				<br></br>
+				<label>Välj version</label>
+				<br>
+				<select class="select-input" id="versions"></select>
+                <br><br>
+				<label>Lägg till ny version</label>
+				<br>
+				<input class="text-input" autocomplete="off" type="text" id="newVersion" placeholder="t.ex. 2.0"/>
+                <br><br>
+				<input class="button" type="button" id="saveButton" value="Spara">
+			</div>
+		</div>
+        <div id="snackbar"></div>
+	</body>
+</html>

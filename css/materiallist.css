@@ -1,0 +1,173 @@
+.wrap {
+    width: 21cm;
+    margin: auto;
+}
+
+.map {
+    width: 21cm;
+    height: 66vh;
+    margin: auto;
+}
+
+#mapDiv {
+    width: 21cm;
+    height: 66vh;
+    margin: auto;
+}
+
+.materiallist {
+    border-spacing: 0;
+    border: none;
+    border: 1px solid #ddd;
+    table-layout: fixed;
+    margin-bottom: 5vh;
+}
+
+.materiallist th {
+    background-color: #3867d6;
+    color: white;
+}
+
+.materiallist th, .materiallist td {
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    padding: 0.8rem 0;
+    width: 15vw;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2
+}
+
+.right {
+    text-align: right;
+    width: 100%;
+}
+
+.circleNumbers {
+    position: absolute;
+    z-index: 9999;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #000;
+    border-radius: 50%;
+    margin-left: calc((100vw - 21cm) / 2);
+}
+
+.circleNumbers p {
+    font-family: 'Fira Sans', sans-serif;
+    font-weight: bold;
+    font-size: 17px;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.print {
+    float: right;
+}
+
+.fancy-button:hover {
+    cursor: pointer;
+}
+
+.fancy-light-button:hover {
+    cursor: pointer;
+}
+
+#backToMap i {
+    font-size: 51px !important;
+    float: left;
+    margin: 0.5rem 0;
+}
+
+#backToMap p {
+    float: left;
+    line-height: 33px;
+    position: relative;
+}
+
+@media print {
+    @page {
+        size: auto;
+        margin: 0;
+    }
+
+    .wrap {
+        width: 100vw;
+        margin: auto;
+    }
+
+    #printMateriallist {
+        display: none;
+    }
+
+    .materiallist {
+        width: 100vw;
+    }
+
+    .material-icons {
+        display: none;
+    }
+
+    .leaflet-control-layers {
+        display: none;
+    }
+
+    .leaflet-control {
+        display: none;
+    }
+
+    #myMaterialMap {
+        height: 66vh;
+    }
+
+    #mapDiv {
+        height: 66vh;
+        width: 100vw;
+    }
+
+    .number-input {
+        padding: 0 !important;
+        border: hidden !important;
+        color: black !important;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+
+    .materiallist {
+        border: hidden !important;
+        padding: 2vw;
+    }
+
+    .circleNumbers {
+        background-color: #fff;
+        color: #000;
+        border: 1px solid #000;
+    }
+
+    .gmnoprint {
+        display: none !important;
+    }
+
+    .gm-style-cc {
+        display: none !important;
+    }
+
+    .circleNumbers {
+        margin-left: 0;
+    }
+
+    #backToMap {
+        display: none;
+    }
+}

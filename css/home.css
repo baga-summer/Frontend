@@ -1,0 +1,60 @@
+.wrap {
+    width: 90%;
+    margin: auto;
+}
+
+.title h1 {
+    margin: 0;
+    padding: 3rem 0;
+    font-size: 3rem;
+    font-weight: 300;
+    text-align: center;
+}
+
+.projectlist {
+    margin: auto;
+}
+
+.project  h2 {
+    font-weight: 400;
+}
+
+.creators {
+    display: flex;
+    flex-direction: column;
+    width: 20%;
+}
+
+.creatorname {
+    margin: 0.5rem;
+    font-weight: 400;
+    text-align: left;
+}
+
+.projectlink {
+    color: #000;
+}
+
+.last-project {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.button-wrap {
+    margin: 2rem 0;
+}
+
+.tbl-short {
+    width: 10%;
+}
+
+.tbl-long {
+    min-width: 30%;
+    margin: auto;
+}
+
+.rights {
+    padding: 2px 4px;
+    border-radius: 3px;
+    background: rgba(18, 128, 196, 0.7);
+    color: #fff;
+}

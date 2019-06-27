@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="sv" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>Admin</title>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400" rel="stylesheet">
+        <link rel="stylesheet" href="css/master.css">
+        <link rel="stylesheet" href="css/admin.css">
+    </head>
+    <body>
+        <div class="topnav">
+            <div class="links">
+                <a href="home.html">Hem</a>
+                <a href="calculations.html">Beräkningar</a>
+                <a href="listProducts.html">Produkter</a>
+                <span id="extraLinks"></span>
+                <a href="changepassword.html">Byt lösenord</a>
+                <a id="logout" href="#logout">Logga ut</a>
+            </div>
+            <div class="greet-user">
+                <span id="userName"></span>
+                <a class="helpicon" href="user-guide.pdf" target="_blank">
+                    <i class="material-icons">help_outline</i>
+                </a>
+            </div>
+        </div>
+        <div class="wrap">
+            <h1 class="title">Administration</h1>
+            <div class="admin-menu">
+                <ul class="nav-ul">
+                    <li><a name="global" class="nav-link" href="#">Globala produkter</a></li>
+                    <!-- <li><a name="projects" class="nav-link" href="#">Alla projekt</a></li> -->
+                    <li><a name="all-users" class="nav-link" href="#">Alla användare</a></li>
+                    <li><a name="new-user" class="nav-link" href="#">Skapa ny användare</a></li>
+                </ul>
+            </div>
+            <div id="errorHolder" class="error-wrap"></div>
+            <br>
+            <div class="admin-content" id="adminContent"></div>
+        </div>
+        <script src="js/configVariables.js" charset="utf-8"></script>
+        <script src="js/APIMiddleware.js" charset="utf-8"></script>
+        <script src="js/login/logout.js"></script>
+        <script src="js/admin/adminContent.js" charset="utf-8"></script>
+    </body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="sv" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+		<title>Uppdatera projekt</title>
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400" rel="stylesheet">
+		<link rel="stylesheet" href="css/master.css">
+		<link rel="stylesheet" href="css/newproject.css">
+		<script src="js/APIMiddleware.js" charset="utf-8"></script>
+		<script src="js/login/logout.js"></script>
+	</head>
+	<body>
+		<div class="topnav">
+			<div class="links">
+				<a class="active" href="home.html">Hem</a>
+				<a href="calculations.html">Beräkningar</a>
+				<a href="listProducts.html">Produkter</a>
+				<span id="extraLinks"></span>
+				<a href="changepassword.html">Byt lösenord</a>
+				<a id="logout" href="#logout">Logga ut</a>
+			</div>
+			<div class="greet-user">
+				<span id="userName"></span>
+				<a class="helpicon" href="user-guide.pdf" target="_blank">
+                    <i class="material-icons">help_outline</i>
+                </a>
+			</div>
+		</div>
+        <div class="wrap-all">
+            <div class="wrap">
+                <h1 class="title">Uppdatera projekt</h1>
+                <form name="myForm" method="post">
+                    Projektnamn: <input class="text-input" id="projectName" type="text" name="projectname">
+                    <br><br>
+                    Version: <input class="text-input readonly" id="projectVersion" type="text" name="projectversion" readonly>
+                    <h3>Behörigheter:</h3>
+                    <div class="button-wrap">
+                        <a class="button" id="addButton">Lägg till behörigheter</a>
+                    </div>
+                    <div id="newField"></div>
+                    <h3>Standardvärden:</h3>
+                    Personer per hushåll:<br><input class="number-input" id="peopleperhouse" type="number" value="5" name="peopleperhouse">
+                    <br><br>
+                    Liter per person:<br><input class="number-input" disabled id="litreperperson" type="number" value="150" name="litreperperson">
+					<br><br>
+                    <div class="button-wrap left-right-space">
+                        <a id="updateProjectButton" class="button">Uppdatera projekt</a>
+						<a class="button danger-bt" id="deleteProjectButton">Ta bort projekt</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+	</body>
+	<script src="js/configVariables.js" charset="utf-8"></script>
+    <script type="text/javascript" src="js/projects/updateproject.js"></script>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="sv" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+		<title>Beräkningssida</title>
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400" rel="stylesheet">
+		<link rel="stylesheet" href="css/master.css">
+		<link rel="stylesheet" href="css/calculations.css">
+	</head>
+	<body>
+      <div class="topnav">
+          <div class="links">
+              <a href="home.html">Hem</a>
+              <a class="active" href="calculations.html">Beräkningar</a>
+              <a href="listProducts.html">Produkter</a>
+			  <span id="extraLinks"></span>
+			  <a href="changepassword.html">Byt lösenord</a>
+              <a id="logout" href="#logout">Logga ut</a>
+          </div>
+          <div class="greet-user">
+              <span id="userName"></span>
+			  <a class="helpicon" href="user-guide.pdf" target="_blank">
+				  <i class="material-icons">help_outline</i>
+			  </a>
+          </div>
+      </div>
+	  <h1 class="title">Beräkningssida</h1>
+		<div class="wrap">
+			<div class="container">
+				<div class="sub-header">
+					<h3>Spillvatten</h3>
+				</div>
+				<div class="form-wrap">
+					<form class="form-inline" autocomplete="off">
+						<span class="form-element-pair">
+							<label for="length">Längd</label><br>
+							<input class="number-input" data-digits-only step="0.01" type="number" id="length" name="length" placeholder="Längd" onkeypress="enterPressed(this, event);">&nbsp; m
+						</span>
+						<span class="form-element-pair">
+							<label for="height">Statisk höjd</label><br>
+							<input class="number-input" data-digits-only step="0.01" type="number" id="height" name="height" placeholder="Höjd" onkeypress="enterPressed(this, event);">&nbsp; m
+						</span>
+						<span class="form-element-pair">
+							<label for="material">Material</label><br>
+							<select class="select-input" id="material" name="material">
+								<option value="choose" disabled selected>Välj material</option>
+								<option value="PEM">PEM</option>
+								<option value="PE">PE</option>
+								<option value="stainless">Rostfria</option>
+							</select>
+						</span>
+						<span class="form-element-pair">
+							<select class="select-input" id="selectDim">
+							</select>
+						</span>
+						<span class="form-element-pair">
+							<label for="mu" id="muLabel">Råhetstal</label><br>
+								<input class="number-input" data-digits-only
+									step="0.001" type="number" id="mu"
+									name="mu"
+									value="0.1" onkeypress="enterPressed(this, event);">&nbsp; mm
+							</span>
+						<!-- Below has been outcommented becuase there is
+						  currently nothing that changes depending on the
+						  selected radio button.
+							We think the point of the buttons are to know which pipe to use
+							depending on the pressure class when there are
+							several pipes with the same outer dimensions
+						-->
+						<!-- <span class="form-element-pair radio-bt-txt">
+							<label name="pressureChoice"></label>
+							<input type="radio" id="pressure1" name="PN" value="PN6,3">
+						</span>
+						<span class="form-element-pair radio-bt-txt">
+							<label name="pressureChoice"></label>
+							<input type="radio" id="pressure2" name="PN" value="PN10">
+						</span>-->
+						<span class="form-element-pair">
+							<label for="flow" id ="flowLabel">Önskat flöde</label>
+							<span id="flow-wrap">
+								<input class="number-input" data-digits-only step="0.01" type="number" id="flow" name="flow" placeholder="0" onkeypress="enterPressed(this, event);">&nbsp;
+								<select class="select-input" id="selectUnit">
+									<option value="lps" selected>l/s</option>
+									<option value="lpm">l/m</option>
+									<option value="m3ph">m³/h</option>
+								</select>
+							</span>
+						</span>
+						<span class="form-element-pair">
+							<div class="button-wrap">
+								<input class="button" type="button" name="submit" id="submit" value="Beräkna" onclick="calcAll();">
+							</div>
+						</span>
+					</form>
+
+					<div class="all-results">
+						<h3 class="result-header">Resultat</h3>
+						<div class="result">
+							<span class="result-name">Flödeshastighet</span>
+							<span class="result-valueUnit">
+								<span class="result-value" id="flowSpeed"></span>
+								<span class="result-unit">m/s</span>
+							</span>
+						</div>
+						<div class="result">
+							<span class="result-name">Statiskt tryck</span>
+							<span class="result-valueUnit">
+								<span class="result-value" id="staticPressure"></span>
+								<span class="result-unit">m</span>
+							</span>
+						</div>
+						<div class="result">
+							<span class="result-name">Tryckförluster</span>
+							<span class="result-valueUnit">
+								<span class="result-value" id="pressureLoss"></span>
+								<span class="result-unit">m</span>
+							</span>
+						</div>
+						<div class="result">
+							<span class="result-name">Totaltryck</span>
+							<span class="result-valueUnit">
+								<span class="result-value" id="totalPressure"></span>
+								<span class="result-unit">m</span>
+							</span>
+						</div>
+						<div id="pump-suggestions">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="explain-image">
+				<img class="lyfthojd-img" src="img/lyfthojd.png" alt="Lyfthöjd av vatten från en pumpstation">
+			</div>
+			<script src="js/APIMiddleware.js" charset="utf-8"></script>
+			<script src="js/login/logout.js"></script>
+			<script src="js/configVariables.js"></script>
+			<script src="js/calculations/exportCalc.js"></script>
+			<script src="js/calculations/flowCalc.js"></script>
+		</body>
+	</html>

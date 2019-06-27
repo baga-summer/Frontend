@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="sv" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>Logga In - Baga Aqua System</title>
+        <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400" rel="stylesheet">
+        <link rel="stylesheet" href="css/master.css">
+        <link rel="stylesheet" href="css/login.css">
+        <script src="js/APIMiddleware.js" charset="utf-8"></script>
+    </head>
+    <body>
+        <div class="wrap">
+            <h1 class="title">Baga Aqua System</h1>
+            <h2>Logga In</h2>
+            <div class="error-wrap" id="error-holder"></div>
+            <div class="form-field">
+                <form id="login-form">
+                    <input id="email" class="text-input" type="text" name="username" placeholder="Epost">
+                    <br><br>
+                    <input id="password" class="text-input" type="password" name="password" placeholder="Lösenord">
+                    <br><br><br>
+                    <a id="login-bt" class="login-bt button" type="button" name="login-bt" href="#">Logga In</a>
+                </form>
+                <br>
+                <div class="login-helpers">
+                    <a class="small-link" href="register.html">Registrera nytt konto?</a>
+                    <br><br>
+                    <a class="small-link" href="forgotpassword.html">Glömt lösenord?</a>
+                </div>
+            </div>
+        </div>
+        <script src="js/configVariables.js" charset="utf-8"></script>
+        <script src="js/login/authenticate.js" charset="utf-8"></script>
+    </body>
+</html>

@@ -1,0 +1,44 @@
+.text-input {
+    width: 100%;
+}
+
+.accessSelect {
+    width: 60%;
+    margin-right: 2%;
+}
+
+.accessSelect:after {
+  background: #1280c4;
+}
+
+.accessCompetence {
+    width: 38%;
+    padding: 0.4rem;
+}
+
+.button-wrap {
+    margin: 2rem 0;
+}
+
+.buttonNumber {
+    padding: 0.4rem 0.6rem;
+}
+
+.removeDiv {
+    margin: 1rem 0;
+}
+
+.wrap-all {
+    margin: auto;
+    width: 90%;
+    font-family: 'Fira Sans', sans-serif;
+}
+
+.wrap {
+    margin: auto;
+    width: 60%;
+}
+
+#updateProjectButton {
+    padding-bottom: 1rem;
+}
