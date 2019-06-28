@@ -197,6 +197,19 @@ const calculations = {
 		return loss;
 	},
 
+	/*
+	 * Calculates the additional pressure loss when a pipe is bent 90 degrees
+	 *
+	 * @param {INTEGER} Value that represents circumference of the bend in the
+	 * 					pipe.
+	 * @param {INTEGER} Value that represents inner diameter of the pipe
+	 * @param {INTEGER} Value that represents the speed of fluid in the pipe
+	 * 					before the bend.
+	 *
+	 * @return {INTEGER} Value that represents the additional pressure loss because
+	 *                   of the bend.
+	 * The formula was found at https://www.pumpportalen.se/pumphandboken/11-2-rorstromningsforluster/
+	 * */
 	pipeBend: (bendCircum, innerDiameter, speed) => {
 		let koef = 0;
 
