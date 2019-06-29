@@ -779,13 +779,13 @@ let getConnectedValues = (first, last) => {
  *
  * @returns {void}
  */
-let checkPump = (pump, pressure, dim) => {
+let checkPump = (pump, pressure, dim, pressLoss = 0) => {
     let found = false;
     let mps = 0;
     let result = {};
 
     for (let i = 0; i < pump.Pumpkurva.length; i++) {
-        if (pump.Pumpkurva[i].y == pressure) {
+        if (pump.Pumpkurva[i].y == (pressure + pressLoss)) {
             mps = calculations.calcVelocity(pump.Pumpkurva[i].x, dim);
             mps /= 1000;
             result.mps = mps;
@@ -803,8 +803,8 @@ let checkPump = (pump, pressure, dim) => {
         }
     }
     if (!found) {
-        if (pressure < pump.Pumpkurva[0].y && pressure >
-            pump.Pumpkurva[pump.Pumpkurva.length - 1].y) {
+        if ((pressure + pressLoss) < pump.Pumpkurva[0].y &&
+			(pressure + pressLoss) > pump.Pumpkurva[pump.Pumpkurva.length - 1].y) {
             mps = calculations.calcVelocity(calculations.estPumpValue(pressure,
                 pump.Pumpkurva), dim);
             mps /= 1000;
