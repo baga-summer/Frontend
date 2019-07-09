@@ -175,6 +175,7 @@ let newPumpCurve = () => {
     <input class="number-input newInput" id="velocity"
     type="number" step="0.1" placeholder="Flöde (l/s)">
 	<a class="button2 button small-button">Lägg till</a>
+	<a class="button3 button small-button" onclick = uploadCurve()>Ladda upp</a>
     <br><br>
 	<canvas id="myChart"></canvas>`;
 
@@ -269,7 +270,74 @@ let newPumpCurve = () => {
             myLineChart.update();
         }
     });
+
+    button.addEventListener('click', () => {
+			console.log("etst");
+    });
+
 };
+
+/**
+ * Function for applying an excel document of the user's choosing.
+ * No parameters are needed and the only thing returned is an indication of
+ * success or failure.
+ *
+ * @returns bool
+ */
+function uploadCurve() {
+	let success = false;
+
+	let jObject = [{
+			"height": "2",
+			"pwd": 1
+		},{
+			"height": "4",
+			"pwd": 2
+		},{
+			"height": "5",
+			"pwd": 3
+		},{
+			"height": "6",
+			"pwd": 4
+		},{
+			"height": "9",
+			"pwd": 5
+		},{
+			"height": "14",
+			"pwd": 6
+		},{
+			"height": "15",
+			"pwd": 7
+		},{
+			"height": "18",
+			"pwd": 8
+		},{
+			"height": "19",
+			"pwd": 9
+		},{
+			"height": "22",
+			"pwd": 10
+		},{
+			"height": "24",
+			"pwd": 11
+		},{
+			"height": "29",
+			"pwd": 12
+		},{
+			"height": "33",
+			"pwd": 13
+		}];
+
+	for (let i = 0; i < jObject.length; i++) {
+		myLineChart.data.datasets[0].data.push({
+				x: jObject[i].height,
+				y: jObject[i].pwd
+		});
+		myLineChart.update();
+	}
+
+	return success;
+}
 
 /**
  * Help function for array numeric sort
