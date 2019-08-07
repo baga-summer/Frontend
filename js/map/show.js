@@ -373,6 +373,14 @@ export const show = {
 
 
         for (let i = alerts.length - 1; i >= 0; i--) {
+            let index = hiddenAlerts.indexOf(alerts[i]);
+
+            if (index > -1) {
+                hiddenAlerts.splice(index, 1);
+            } else {
+                visibleAlerts--;
+            }
+
             alerts[i].remove();
         }
         if (element._icon != null) {

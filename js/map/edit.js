@@ -2,6 +2,8 @@
 export let isEdit = null;
 let tempPolylineArray = [];
 
+export let lists = [];
+
 //Imports the map object
 import { map, token, pumps, icons, projectInfo } from "./loadLeafletMap.js";
 
@@ -9,7 +11,14 @@ import { add, polylines, markers, polygons } from "./add.js";
 
 import { show, mouseCoord } from "./show.js";
 
-import { Marker, House, Pipe, mapId, setMapId, guideline } from "./classes.js";
+import { Marker, House, Pipe, mapId, setMapId, } from "./classes.js";
+
+import { StartData, PumpstationData, BranchConnData, DefaultData } from "./calculationClasses.js";
+
+import { LinkedList } from "./linkedList.js";
+
+import { Graph, Queue } from "./graph.js";
+
 
 export const edit = {
 
@@ -126,11 +135,6 @@ export const edit = {
             layer.off("click", add.pipe);
         });
         document.getElementById("myMap").style.cursor = "grab";
-        if (guideline != null) {
-            polygons.eachLayer((polygon) => {
-                polygon.stopDrawing();
-            });
-        }
     },
 
     /**
@@ -232,11 +236,17 @@ export const edit = {
         let json = [];
         let temp;
         let status;
+        let listData = [];
+
+        for (let i = 0; i < lists.length; i++) {
+            listData.push(lists[i].getAll());
+        }
 
         temp = {
             zoom: map.getZoom(),
             center: map.getCenter(),
-            mapId: mapId
+            mapId: mapId,
+            lists: listData,
         };
 
         json.push(temp);
@@ -288,7 +298,7 @@ export const edit = {
                         flow: polygon.flow,
                         color: polygon.options.color.replace('#', ''),
                     },
-                    used: polygon.used,
+                    used: polygon.calculation.used,
                 }
             };
 
@@ -345,6 +355,14 @@ export const edit = {
 
         map.setView(json[0].center, json[0].zoom);
         setMapId(json[0].mapId);
+        for (let i = 0; i < json[0].lists.length; i++) {
+            let list = new LinkedList;
+
+            for (let j = 0; j < json[0].lists[i].length; j++) {
+                list.add(json[0].lists[i][j]);
+            }
+            lists.push(list);
+        }
 
         //Loop through json data.
         for (let i = 1; i < json.length; i++) {
@@ -400,113 +418,108 @@ export const edit = {
 
         pressure: async (element) => {
             let all = [];
-            let total;
-            let flow;
+            let allPolylines = [];
+            let checkbox = document.getElementById('toggleCalculations');
 
-            if (element == null) { return false; }
+            if (element == null || checkbox.checked == false) { return false; }
 
             polylines.eachLayer((polyline) => {
                 all.push(polyline);
+                allPolylines.push(polyline);
             });
-            markers.eachLayer((marker) => {
-                all.push(marker);
-            });
-            polygons.eachLayer((polygon) => {
-                all.push(polygon);
-            });
+            markers.eachLayer((marker) => { all.push(marker); });
+            polygons.eachLayer((polygon) => { all.push(polygon); });
 
             let first = all.find(find => find.id == element.connected_with.first);
             let last = all.find(find => find.id == element.connected_with.last);
+            let list;
+            let index;
+            let temp;
 
+            switch (first.constructor) {
+                case L.Polygon:
+                    if (first.calculation.used == false) {
+                        first.calculation.used = true;
 
-            if (first != null) {
-                switch (first.constructor) {
-                    case L.Polygon:
-                        if (first.used == false) {
-                            last.calculation.nop += parseInt(first.nop);
-                            flow = checkFlow(first.nop);
-                            last.calculation.capacity = parseFloat(flow);
-                            first.used = true;
+                        let current = new StartData(first.id);
 
-                            checkBranchConnection(first, last);
-                        }
-                        calculateNextPolyline(last, 'first');
-                        break;
+                        temp = findMyList(first, last);
 
+                        list = temp.list;
+                        index = temp.index;
+                        first.calculation.listIndex = index;
+
+                        list.add(current.data);
+                        checkNextList(list, true, all, allPolylines);
+                    }
+                    break;
+
+                case L.Marker:
+                    temp = findMyList(first, last);
+
+                    list = temp.list;
+                    index = temp.index;
+
+                    if (list.ready && !last.calculation.used) {
+                        temp = beginNewList(
+                            list.pumpstation.id,
+                            first.id,
+                            all,
+                            allPolylines,
+                            list);
+
+                        list = temp.list;
+                        index = temp.index;
+                        addMarkerToList(first, list);
+                        first.calculation.listIndex = index;
+                    }
+
+                    if (first.calculation.used == null) {
+                        first.calculation.used = true;
+                        first.calculation.listIndex = index;
+                        addMarkerToList(first, list);
+                    }
+                    break;
+            }
+            if (list != null) {
+                switch (last.constructor) {
                     case L.Marker:
-                        if (first.calculation.capacity > 0) {
-                            if (first.attributes.Kategori == "Pumpstationer") {
-                                total = calculateTotalPressure(
-                                    first.calculation.capacity,
-                                    element.dimension.inner,
-                                    element.length,
-                                    element.tilt,
-                                );
+                        if (last.calculation.used == null) {
+                            last.calculation.used = true;
+                            last.calculation.listIndex = index;
+                            addMarkerToList(last, list);
+                        } else {
+                            if (list instanceof Array) {
+                                if (list[0] != list[1]) {
+                                    if (!list[0].end.status && list[0].pumpstation) {
+                                        if (last instanceof L.Marker) {
+                                            if (last.attributes != "Förgrening") {
+                                                addMarkerToList(last, list[0]);
+                                                temp = new StartData(first.id);
 
-                                if (last instanceof L.Marker) {
-                                    if (last.attributes.Kategori == "Förgrening" &&
-                                            last.calculation.used == null) {
-                                        last.calculation.nop +=
-                                                parseInt(first.calculation.nop);
-
-                                        let temp = polylines.getLayers();
-                                        let connected = temp.filter(find => find.connected_with
-                                            .last == last.id && find != element);
-
-                                        if (connected != null) {
-                                            connected = connected[0];
-                                            temp = markers.getLayers();
-                                            temp = temp.find(find => find.id == connected
-                                                .connected_with.first);
-                                            if (temp != null) {
-                                                last.calculation.nop +=
-                                                        parseInt(temp.calculation.nop);
+                                                list[1].add(temp.data);
+                                                checkNextList(list[0], true, all,
+                                                    allPolylines);
                                             }
                                         }
-                                        last.calculation.used = true;
-                                        let next = findNextPolyline(last, 'first');
-
-                                        temp = markers.getLayers();
-                                        temp = temp.find(find => find.id == next.connected_with
-                                            .last);
-                                        if (temp != null) {
-                                            temp.calculation.nop +=
-                                                    parseInt(first.calculation.nop);
-                                            let flow = checkFlow(temp.calculation.nop);
-
-                                            temp.calculation.capacity = parseFloat(flow);
-                                            calculateNextPolyline(temp, 'first');
-                                        }
+                                    } else if (!list[0].ready || !list[1].ready) {
+                                        list[0].concat(list[1]);
+                                        last.calculation.listIndex = index;
                                     }
                                 }
-
-                                calculateLast(first, last, pumps, total, element.dimension
-                                    .inner);
-                            } else if (first.attributes.Kategori == "Förgrening") {
-                                let polyline = findNextPolyline(first, 'last');
-
-                                let temp = markers.getLayers();
-                                let find = temp.find(find =>
-                                    find.id == polyline.connected_with.first);
-
-                                if (find != null) {
-                                    if (find.attributes.Kategori == "Pumpstationer") {
-                                        edit.warning.pressure(polyline);
-                                    }
-                                }
-                                last.calculation.nop = first.calculation.nop;
-                                last.calculation.capacity = first.calculation.capacity;
-                                calculateNextPolyline(last, 'first');
-                            } else {
-                                last.calculation.nop = first.calculation.nop;
-                                last.calculation.capacity = first.calculation.capacity;
-                                calculateNextPolyline(last, 'first');
+                                list = list[0];
+                                index = index[0];
                             }
-                        } else {
-                            resetMarkers(element);
                         }
-
                         break;
+                }
+                if (list.ready) {
+                    calculateList(list, all, allPolylines);
+                }
+
+                lists[index] = list;
+                if (list != undefined) {
+                    console.log(list.getAll());
                 }
             }
         }
@@ -544,6 +557,326 @@ export let findNextPolyline = (element, value) => {
 };
 
 /**
+ * findMyList - Finds out which list the elements belongs to
+ *
+ * @param {type} first The first element connected to the polyline that is currently being used
+ * @param {type} last  The last element connected to the current polyline
+ *
+ * @returns {object} returns the list(s) and the index(es) that the elements belongs to
+ */
+let findMyList = (first, last) => {
+    if (!Number.isInteger(first.calculation.listIndex) && !Number.isInteger(
+        last.calculation.listIndex)) {
+        return {
+            list: new LinkedList,
+            index: lists.length
+        };
+    } else if (!Number.isInteger(first.calculation.listIndex) &&
+        Number.isInteger(last.calculation.listIndex)) {
+        return {
+            list: lists[last.calculation.listIndex],
+            index: last.calculation.listIndex
+        };
+    } else if (Number.isInteger(first.calculation.listIndex) &&
+        !Number.isInteger(last.calculation.listIndex)) {
+        return {
+            list: lists[first.calculation.listIndex],
+            index: first.calculation.listIndex
+        };
+    } else {
+        return {
+            list: [lists[first.calculation.listIndex], lists[last.calculation.listIndex]],
+            index: [first.calculation.listIndex, last.calculation.listIndex]
+        };
+    }
+};
+
+/**
+ * addMarkerToList - Adds marker and correct type to selected list
+ *
+ * @param {type} marker Selected marker that will be added to the list
+ * @param {type} list   Selected list that the marker will be added
+ *
+ * @returns {void}
+ */
+let addMarkerToList = (marker, list) => {
+    let current;
+
+    switch (marker.attributes.Kategori) {
+        case "Pumpstationer":
+            current = new PumpstationData(marker.id);
+            break;
+        case "Förgrening":
+            current = new BranchConnData(marker.id);
+            break;
+        default:
+            current = new DefaultData(marker.id);
+            break;
+    }
+    list.add(current.data);
+};
+
+/**
+ * beginNewList - When the previous list is full (ready) a new list needs to be created but some
+ * 				  elements from the previous list needs to be added to the new list
+ *
+ * @param {type} start        The pumpstation from the previous list
+ * @param {type} end          The first element in the new list
+ * @param {type} all          All elements (houses, markers & polylines) currently placed on map
+ * @param {type} allPolylines All polylines currently placed on map
+ * @param {type} list         previous list
+ *
+ * @returns {object} returns the new list and the new list index
+ */
+let beginNewList = (start, end, all, allPolylines, list) => {
+    let vertices = list.getAll();
+    let graph = createGraph(vertices, all, allPolylines, false);
+
+    let newList = new LinkedList;
+    let newIndex = lists.length;
+
+    let temp = new StartData(start);
+
+    newList.add(temp.data);
+
+    let current = graph.getChildren(start);
+
+    current = current[0];
+    while (current != end) {
+        current = all.find(find => find.id == current);
+        addMarkerToList(current, newList);
+        current = current.id;
+
+        current = graph.getChildren(current);
+        current = current[0];
+    }
+
+    return { list: newList, index: newIndex };
+};
+
+/**
+ * calculateList - When a list is full (ready) it is send here to be calculated
+ *
+ * @param {type} list         The list that is going to be calculated
+ * @param {type} all          All elements (houses, markers & polylines) currently placed on map
+ * @param {type} allPolylines All polylines currently placed on map
+ *
+ * @returns {void}
+ */
+let calculateList = (list, all, allPolylines) => {
+    // sort the list so that type 0 is first, this means that elements with flow is first and
+    // the last element is placed last
+    let vertices = list.sort();
+    let usedVertices = [];
+    let graph = createGraph(vertices, all, allPolylines, true);
+
+    // only for debugging
+    graph.printGraph();
+
+    // go through every vertices
+    for (let i = 0; i < vertices.length - 1; i++) {
+        let current = vertices[i];
+        // get current element from all array
+
+        current = all.find(find => find.id == current);
+        // if current is a marker (pumpstation, branch connection or another product)
+        if (current instanceof L.Marker) {
+            calculateParents(current, all, graph, usedVertices);
+        }
+        calculateChildren(current, all, graph, usedVertices);
+    }
+
+    let end = vertices[vertices.length - 1];
+    let pumpstation = list.pumpstation.id;
+
+    pumpstation = all.find(find => find.id == pumpstation);
+
+    calculateLast(end, pumpstation, graph, all, polylines.getLayers());
+};
+
+/**
+ * createGraph - Create a data structure graph. Starts by adding all vertices and reset values from
+ * 				 previous calculation.
+ * 				 After that are edges added (this is which vertices are connected to which)
+ * 				 A queue is used to handle if a vertices is connected to multiple vertices
+ *
+ * @param {type} vertices     All elements that the graph will include
+ * @param {type} all          All elements (houses, markers & polylines) currently placed on map
+ * @param {type} allPolylines All polylines currently placed on map
+ *
+ * @returns {Graph} Returns created graph with edges
+ */
+let createGraph = (vertices, all, allPolylines, reset) => {
+    let graph = new Graph(vertices.length);
+    let queue = new Queue();
+
+    for (let i = 0; i < vertices.length; i++) {
+        graph.addVertex(vertices[i].id);
+
+        // if reset is true
+        if (reset) {
+            // reset values for everyone except vertices with type 0
+            if (vertices[i].type != 0) {
+                let current = all.find(find => find.id == vertices[i].id);
+
+                current.calculation.nop = 0;
+                current.calculation.capacity = 0;
+            }
+        }
+        vertices[i] = vertices[i].id;
+
+        let connected = allPolylines.filter(find => find.connected_with.first == vertices[i]);
+
+        for (let j = 0; j < connected.length; j++) {
+            let last = all.find(find => find.id == connected[j].connected_with.last);
+
+            queue.enqueue({ first: vertices[i], last: last.id });
+        }
+    }
+
+    while (!queue.isEmpty()) {
+        let queueElement = queue.dequeue();
+
+        if (vertices.includes(queueElement.last)) {
+            graph.addEdge(queueElement.first, queueElement.last);
+        }
+    }
+
+    return graph;
+};
+
+/**
+ * calculateParents - Check current parents if one or more element have not been used.
+ * 					  If unused parent is found add nop (number of people) to current and add
+ * 					  parent to used vertices
+ *
+ * @param {type} current      The child element
+ * @param {type} all          All elements (houses, markers & polylines) currently placed on map
+ * @param {type} graph        The graph that is being used for the calculations
+ * @param {type} usedVertices A array with all vertices that have been used already
+ *
+ * @returns {void}
+ */
+let calculateParents = (current, all, graph, usedVertices) => {
+    let parents = graph.getParents(current.id);
+
+    if (parents.length > 0) {
+        for (let i = 0; i < parents.length; i++) {
+            let parent = all.find(find => find.id == parents[i]);
+
+            if (parent instanceof L.Marker && !usedVertices.includes(parent)) {
+                current.calculation.nop += parseFloat(parent.calculation.nop);
+                usedVertices.push(parent);
+            }
+        }
+    }
+};
+
+
+/**
+ * calculateChildren - Add nop (number of people) to all current children
+ *
+ * @param {type} current      The parent element
+ * @param {type} all          All elements (houses, markers & polylines) currently placed on map
+ * @param {type} graph        The graph that is being used for the calculations
+ * @param {type} usedVertices A array with all vertices that have been used already
+ *
+ * @returns {void}
+ */
+let calculateChildren = (current, all, graph, usedVertices) => {
+    // find children (vertices that are connected to current)
+    let children = graph.getChildren(current.id);
+
+    // if a child/children is found
+    if (children.length > 0) {
+        let nop = current instanceof L.Polygon ? current.nop : current.calculation.nop;
+
+        // go through every children
+        for (let j = 0; j < children.length; j++) {
+            let child = all.find(find => find.id == children[j]);
+
+            // if child is a pumpstation or branch connection
+            if (child instanceof L.Marker && !usedVertices.includes(child)) {
+                child.calculation.nop += parseFloat(nop);
+                usedVertices.push(current);
+            }
+
+            let flow = checkFlow(child.calculation.nop);
+
+            child.calculation.capacity = parseFloat(flow);
+
+            console.log("child: ", child.id);
+            console.log("nop", child.calculation.nop);
+        }
+    }
+};
+
+/**
+ * calculateLast - Check if their is branch connection(s) between the pumpstation and the last
+ * 				   element.
+ * 				   If there is, sum total length and handle tilt and calculate total pressure.
+ * 				   If not, calculate total pressure as standard.
+ *
+ * 				   Lastly call getResults() to display calculation
+ *
+ * @param {type} end          the last element in graph
+ * @param {type} pumpstation  the pumpstation element in list
+ * @param {type} graph        The graph that is being used for the calculations
+ * @param {type} all          All elements (houses, markers & polylines) currently placed on map
+ * @param {type} allPolylines All polylines currently placed on map
+ *
+ * @returns {void}
+ */
+let calculateLast = (end, pumpstation, graph, all, allPolylines) => {
+    let polylines = [];
+    let total = 0;
+    let current = pumpstation.id;
+
+    // continue until current child is the end
+    while (current != end) {
+        // add each polyline to array that is not connected to the end
+        polylines.push(allPolylines.find(find => find.connected_with.first == current));
+
+        // go to next child in graph
+        current = graph.getChildren(current);
+        current = current[0];
+    }
+
+    if (polylines.length > 1) {
+        // create a new polyline with the total length and tilt
+        let length = 0;
+        let tilt = 0;
+
+        for (let i = 0; i < polylines.length; i++) {
+            length += polylines[i].length;
+            // find the highest point
+            if (tilt < polylines[i].tilt) {
+                tilt = polylines[i].tilt;
+            }
+        }
+
+        total = calculateTotalPressure(
+            pumpstation.calculation.capacity,
+            polylines[0].dimension.inner,
+            length,
+            tilt,
+        );
+
+        console.log(length);
+        console.log(tilt);
+    } else {
+        total = calculateTotalPressure(
+            pumpstation.calculation.capacity,
+            polylines[0].dimension.inner,
+            polylines[0].length,
+            polylines[0].tilt,
+        );
+    }
+
+    getResults(pumpstation, total, polylines[0].dimension.inner);
+};
+
+/**
  * resetMarkers - Removes warnings to pump and reset flow to zero
  * 				- Set last.used to undefined so houses can be connected again
  *
@@ -552,68 +885,172 @@ export let findNextPolyline = (element, value) => {
  * @returns {void}
  */
 export let resetMarkers = (element) => {
-    let next;
-    let temp = markers.getLayers();
+    let allMarkersAndPolygons = markers.getLayers();
 
-    temp = temp.concat(polygons.getLayers());
+    allMarkersAndPolygons = allMarkersAndPolygons.concat(polygons.getLayers());
 
-    let first = temp.find(find => find.id == element.connected_with.first);
-    let last = temp.find(find => find.id == element.connected_with.last);
+    let first = allMarkersAndPolygons.find(find => find.id == element.connected_with.first);
+    let last = allMarkersAndPolygons.find(find => find.id == element.connected_with.last);
 
     if (last != null && last instanceof L.Marker) {
-        if (last.calculation.capacity > 0) {
-            if (first != null) {
-                if (first instanceof L.Polygon) {
-                    last.calculation.nop -= parseInt(first.nop);
-                    let flow = checkFlow(last.calculation.nop);
+        let list = findMyList(first, last);
 
-                    last.calculation.capacity = parseFloat(flow);
-                } else if (first instanceof L.Marker) {
-                    if (first.attributes.Kategori != "Förgrening") {
-                        last.calculation.nop = 0;
-                        last.calculation.capacity = 0;
-                    } else {
-                        last.calculation.nop = first.calculation.nop;
-                        last.calculation.capacity = first.calculation.capacity;
-                    }
+        list = list.list;
+        if (list instanceof Array) {
+            if (list[0] != list[1]) {
+                list[0].remove(list[0].indexOf(last.id));
+                if (!list[0].ready) {
+                    hideAlertsFromList(list[0].getAll());
                 }
-                next = findNextPolyline(last, 'first');
-                edit.warning.pressure(next);
-                show.hideAlert(last);
+
+                list[1].remove(list[1].indexOf(first.id));
+
+                list = list[1];
+            } else {
+                list = list[0];
+
+                // check if it is first or last that should be removed and reset values
+                let firstPolyline = findNextPolyline(first, 'last');
+                let lastPolyline = findNextPolyline(last, 'first');
+
+                if (firstPolyline == null) {
+                    list.remove(list.indexOf(first.id));
+
+                    if (first instanceof L.Polygon) {
+                        first.calculation.used = false;
+                    } else if (first instanceof L.Marker) {
+                        first.calculation.used = null;
+                    }
+                    first.calculation.listIndex = null;
+                } else if (lastPolyline == null) {
+                    list.remove(list.indexOf(last.id));
+                    last.calculation.used = null;
+                    last.calculation.listIndex = null;
+                }
             }
+        }
+
+        // hide all alerts on pumpstations that are part of the list
+        if (!list.ready) {
+            hideAlertsFromList(list.getAll());
+        } else {
+            let allPolylines = polylines.getLayers();
+            let all = allMarkersAndPolygons;
+
+            all = all.concat(allPolylines);
+
+            calculateList(list, all, allPolylines);
+        }
+        // check if there is a different list connected to the current list and set flow to false
+        if (!list.includesType(0)) {
+            checkNextList(list, false);
+        } else {
+            let allPolylines = polylines.getLayers();
+            let all = allMarkersAndPolygons;
+
+            all = all.concat(allPolylines);
+
+            checkNextList(list, true, all, allPolylines);
+        }
+
+        console.log(list.getAll());
+    }
+};
+
+/**
+ * hideAlertsFromList - If a list i broken (was 'ready' or missing 'flow' but not anymore) hide
+ * 						alerts on all markers from that list
+ *
+ * @param {type} temp The list that have been broken
+ *
+ * @returns {void}
+ */
+let hideAlertsFromList = (temp) => {
+    let allMarkers = markers.getLayers();
+
+    for (let i = 0; i < temp.length; i++) {
+        if (temp[i].type == 2) {
+            let current = allMarkers.find(find => find.id == temp[i].id);
+
+            show.hideAlert(current);
         }
     }
 };
 
 /**
- * checkBranchConnection - checks if last point is a branch connection and increases number of
- * 						 - people if a pump with capacity is connected to the branch connection
+ * checkNextList - If the list have been broken or ready check how next list is effected
  *
- * @param {type} last The element to check if it is a branch connection or not
+ * @param {type} list                The selected list
+ * @param {type} value               true/false, this is indicator if the list is ready or broken
+ * @param {null} [all=null]			 All elements currently placed on map
+ * @param {null} [allPolylines=null] All polylines currently placed on map
  *
  * @returns {void}
  */
-let checkBranchConnection = (first, last) => {
-    if (last.attributes.Kategori == "Förgrening") {
-        let next = findNextPolyline(last, 'first');
-        let temp = markers.getLayers();
+let checkNextList = (list, value, all = null, allPolylines = null) => {
+    let allMarkers = markers.getLayers();
 
+    if (list.end.status) {
+        let obj = allMarkers.find(find => find.id == list.end.id);
+        let newList = lists[obj.calculation.listIndex];
 
-        let find = temp.find(find =>
-            find.id == next.connected_with.last);
+        if (newList != list) {
+            newList.flow = value;
+            hideAlertsFromList(newList.getAll());
 
-        if (last.calculation.used == null) {
-            if (find != null && find.calculation.capacity > 0) {
-                last.calculation.nop += find.calculation.nop;
-                last.calculation.old = [{ id: find.id, nop: find.calculation.nop }];
-                let flow = checkFlow(last.calculation.nop);
-
-
-                last.calculation.capacity = parseFloat(flow);
-                last.calculation.used = true;
+            if (list.ready && list.flow) {
+                calculateList(list, all, allPolylines);
             }
+            if (newList.ready && newList.flow) {
+                calculateList(newList, all, allPolylines);
+            }
+
+            checkNextList(newList, value, all, allPolylines);
         }
     }
+};
+
+
+let checkbox = document.getElementById('toggleCalculations');
+
+checkbox.addEventListener("change", () => {
+    if (checkbox.checked == false) {
+        resetAllMarkers();
+        checkbox.used = true;
+    } else if (checkbox.used != null) {
+        restoreAllMarkers();
+        checkbox.used = null;
+    }
+});
+
+/**
+ * resetAllMarkers - removes alerts on all markers and borders
+ *
+ * @returns {void}
+ */
+let resetAllMarkers = () => {
+    markers.eachLayer((marker) => {
+        show.hideAlert(marker);
+    });
+};
+
+/**
+ * restoreAllMarkers - Add red or yellow border to all markers that should have it
+ *
+ * @returns {void}
+ */
+let restoreAllMarkers = () => {
+    markers.eachLayer((marker) => {
+        if (marker.calculation.status != null) {
+            if (marker.calculation.status == 3 || marker.calculation.status == 4) {
+                marker._icon.classList.remove('transparent-border');
+                marker._icon.classList.add('alert-icon');
+            } else if (marker.calculation.status == 1 || marker.calculation.status == 2) {
+                marker._icon.classList.remove('transparent-border');
+                marker._icon.classList.add('warning-icon');
+            }
+        }
+    });
 };
 
 /**
@@ -644,87 +1081,16 @@ let calculateTotalPressure = (capacity, dimension, length, height) => {
     return parseFloat(result);
 };
 
-
-/**
- * calculateLast - Manage different scenarios on the last object that are connected to polyline
- * 				 - Biggest alteration is when the last object is a branch connection
- *
- * @param {L.Marker} first     The marker that have the pump inside it
- * @param {object}   last      The last object that we are handing in the switch case
- * @param {object}   pumps     All the pumps that the database have
- * @param {float} 	 total     total pressure that are calculated beforehand
- * @param {string} 	 dimension Inner dimension of the selected pipe
- *
- * @returns {void}
- */
-let calculateLast = (first, last, pumps, total, dimension) => {
-    let total2;
-    let combinedPressure;
-    let nextPolyline;
-
-    switch (last.constructor) {
-        case L.Marker:
-            if (last.attributes.Kategori == "Pumpstationer") {
-                last.calculation.nop = first.calculation.nop;
-                last.calculation.capacity = first.calculation.capacity;
-                getResults(first, pumps, total, dimension);
-                calculateNextPolyline(last, 'first');
-            } else if (last.attributes.Kategori == "Förgrening") {
-                nextPolyline = findNextPolyline(last, 'first');
-                if (last.calculation.old != null) {
-                    let index = last.calculation.old.map((e) => { return e.id; }).indexOf(first.id);
-
-                    if (index != -1) {
-                        if (last.calculation.old[index].nop != first.calculation.nop) {
-                            last.calculation.nop -= last.calculation.old[index].nop;
-                            last.calculation.nop += first.calculation.nop;
-                            last.calculation.old[index].nop = first.calculation.nop;
-                            calculateNextPolyline(last, 'first');
-                        }
-                    }
-                } else {
-                    last.calculation.old = [];
-                }
-
-                getConnectedValues(first, last);
-
-
-                let flow = checkFlow(last.calculation.nop);
-
-                last.calculation.capacity = parseFloat(flow);
-
-                total2 = calculateTotalPressure(
-                    parseFloat(last.calculation.capacity),
-                    parseFloat(nextPolyline.dimension.inner),
-                    parseFloat(nextPolyline.length),
-                    parseFloat(nextPolyline.tilt)
-                );
-
-                combinedPressure = parseFloat(total) + parseFloat(total2);
-                getResults(first, pumps, combinedPressure, dimension);
-            } else {
-                getResults(first, pumps, total, dimension);
-                last.calculation.nop = first.calculation.nop;
-                last.calculation.capacity = first.calculation.capacity;
-                calculateNextPolyline(last, 'first');
-            }
-            break;
-        default:
-            getResults(first, pumps, total, dimension);
-    }
-};
-
 /**
  * getResults - Checks values against the pump curve by using the checkPump function
  *
  * @param {L.Marker} first     The marker that have the pump inside it
- * @param {object}   pumps     All the pumps that the database have
  * @param {float} 	 total     total pressure that are calculated beforehand
  * @param {string} 	 dimension Inner dimension of the selected pipe
  *
  * @returns {void}
  */
-let getResults = (first, pumps, total, dimension) => {
+let getResults = (first, total, dimension) => {
     let result = {};
     let pump = pumps.find(element =>
         element.Modell == first.attributes.Pump);
@@ -735,39 +1101,6 @@ let getResults = (first, pumps, total, dimension) => {
     result.capacity = first.calculation.capacity;
     first.calculation.status = result.calculations.status;
     show.alert(first, result);
-};
-
-/**
- * getConnectedValues - adds all connected pipes to calculation.old attribute so that if new values
- * 					  - are added branch connection are updated with correct values
- *
- * @param {type} first first object connected to polyline
- * @param {type} last  last object connected to polyline
- *
- * @returns {void}
- */
-let getConnectedValues = (first, last) => {
-    let temp = polylines.getLayers();
-    let connected = temp.filter(find => find.connected_with.last == last.id && find != first);
-
-    temp = markers.getLayers();
-
-    for (let i = 0; i < connected.length; i++) {
-        let tempMarker = temp.find(find => find.id == connected[i].connected_with.first);
-
-        if (tempMarker != null) {
-            let index = last.calculation.old.map((e) => {
-                return e.id;
-            }).indexOf(tempMarker.id);
-
-            if (index == -1) {
-                last.calculation.old.push({
-                    id: tempMarker.id,
-                    nop: tempMarker.calculation.nop
-                });
-            }
-        }
-    }
 };
 
 /**

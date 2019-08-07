@@ -7,7 +7,14 @@ import { options } from "./options.js";
 
 import { polylines, markers, polygons, add, getLength, clearHouse } from "./add.js";
 
-import { edit, calculateNextPolyline, checkFlow, findNextPolyline, resetMarkers } from "./edit.js";
+import {
+    edit,
+    calculateNextPolyline,
+    checkFlow,
+    findNextPolyline,
+    resetMarkers,
+    lists
+} from "./edit.js";
 
 import { show, mouseCoord } from "./show.js";
 
@@ -343,6 +350,12 @@ export class Marker {
         temp = markers.getLayers();
         temp = temp.concat(polygons.getLayers());
 
+        if (this.calculation.listIndex != null) {
+            let list = lists[this.calculation.listIndex];
+
+            list.remove(list.indexOf(this.id));
+        }
+
         if (firstPolyline.length > 0 && lastPolyline.length > 0) {
             let restOf = [];
 
@@ -472,7 +485,7 @@ export class House {
         this.completed = false;
         this.attributes = this.attributes;
         this.polygon = L.polygon([data.coordinates], options.house(data.popup.color));
-        this.polygon.used = false;
+        this.polygon.calculation = { used: false };
         this.polygon.on('remove', () => {
             let lastPolyline = findNextPolyline(this.polygon, 'first');
 
@@ -488,12 +501,6 @@ export class House {
         guideline = L.polyline([data.coordinates, data.coordinates], {
             dashArray: '5, 10'
         }).addTo(map);
-
-        this.polygon.stopDrawing = () => {
-            console.log("sho");
-            this.stopDrawing();
-        };
-
 
         map.on('mousemove', this.updateGuideLine);
         this.stopDrawListener();
@@ -539,7 +546,7 @@ export class House {
         this.polygon.nop = data.popup.nop;
         this.polygon.flow = data.popup.flow;
         this.polygon.id = data.id;
-        this.polygon.used = data.used;
+        this.polygon.calculation = { used: data.used };
         this.completed = true;
 
         map.off('mousemove', this.updateGuideLine);
@@ -570,7 +577,6 @@ export class House {
         guideline.setLatLngs(coord);
     }
 
-
     /**
      * stopDrawListener - When user clicks the 'esc' button
      * 					- hides guideline and stops adding points to house object on click and
@@ -583,45 +589,36 @@ export class House {
         document.addEventListener("keyup", (event) => {
             // If user keyup is key 'esc'
             if (event.keyCode == 27) {
-                this.stopDrawing();
+                if (guideline != null && this.polygon != null && this.completed == false) {
+                    this.completed = true;
+                    let addr;
+
+                    L.esri.Geocoding.reverseGeocode()
+                        .latlng(this.polygon._latlngs[0][0])
+                        .run((error, result) => {
+                            addr = result.address.Match_addr;
+
+                            this.polygon.bindPopup(popup.house(
+                                addr,
+                                "Hus",
+                                projectInfo.default.peoplePerHouse,
+                                projectInfo.default.litrePerPerson,
+                                "#3388ff",
+                            ));
+
+                            this.polygon.address = addr;
+                        });
+
+                    this.polygon.definition = "Hus";
+                    this.polygon.nop = projectInfo.default.peoplePerHouse;
+                    this.polygon.flow = projectInfo.default.litrePerPerson;
+                    this.polygon.on('popupopen', this.updateValues);
+                    map.off('mousemove', this.updateGuideLine);
+                    guideline.remove();
+                    clearHouse();
+                }
             }
         }), { once: true };
-    }
-
-    /**
-     * stopDrawing - hides guideline and stops adding points to house object on click and
-     * 			   - adds popup content for house with address.
-     * @returns {void}
-     */
-    stopDrawing() {
-        if (guideline != null && this.polygon != null && this.completed == false) {
-            this.completed = true;
-            let addr;
-
-            L.esri.Geocoding.reverseGeocode()
-                .latlng(this.polygon._latlngs[0][0])
-                .run((error, result) => {
-                    addr = result.address.Match_addr;
-
-                    this.polygon.bindPopup(popup.house(
-                        addr,
-                        "Hus",
-                        projectInfo.default.peoplePerHouse,
-                        projectInfo.default.litrePerPerson,
-                        "#3388ff",
-                    ));
-
-                    this.polygon.address = addr;
-                });
-
-            this.polygon.definition = "Hus";
-            this.polygon.nop = projectInfo.default.peoplePerHouse;
-            this.polygon.flow = projectInfo.default.litrePerPerson;
-            this.polygon.on('popupopen', this.updateValues);
-            map.off('mousemove', this.updateGuideLine);
-            guideline.remove();
-            clearHouse();
-        }
     }
 
     /**
