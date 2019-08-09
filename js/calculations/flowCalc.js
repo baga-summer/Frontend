@@ -230,9 +230,9 @@ function calcAll() {
 
     getPumps(totalPress, selectedDim);
 
-    let roundVel = velocity.toFixed(2);
-    let roundPress = lostPress.toFixed(2);
-    let roundTotal = totalPress.toFixed(2);
+    let roundVel = velocity.toFixed(1);
+    let roundPress = lostPress.toFixed(1);
+    let roundTotal = totalPress.toFixed(1);
 
     if (roundTotal == "NaN" || roundTotal < 0 ||
         roundPress == "NaN" || roundPress < 0 ||
