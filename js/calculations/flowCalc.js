@@ -460,7 +460,6 @@ function changeDim(selectedDim) {
  */
 const checkValidLogin = async () => {
     let token = localStorage.getItem("token");
-    console.log(token);
 
     if (!token) {
         localStorage.token = "";
