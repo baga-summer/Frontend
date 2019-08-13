@@ -254,7 +254,7 @@ let addBranchConnection = (event, target) => {
 
     if (find != null) {
         if (Number.isInteger(find.calculation.listIndex)) {
-            let current = new BranchConnData(branchMarker.marker);
+            let current = new BranchConnData(branchMarker.marker.id);
 
             lists[find.calculation.listIndex].add(current.data);
             branchMarker.marker.calculation.listIndex = find.calculation.listIndex;

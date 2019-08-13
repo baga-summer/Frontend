@@ -2,6 +2,9 @@
 export let mouseCoord = null;
 let hiddenAlerts = [];
 let visibleAlerts = 0;
+let usedTimers = [];
+let timers = [];
+
 
 // Imports the map object.
 import { map, objectData } from "./loadLeafletMap.js";
@@ -194,10 +197,20 @@ export const show = {
 
                     parent.appendChild(div);
 
-                    setTimeout(() => {
-                        div.children[0].style.opacity = "0";
-                        setTimeout(() => div.remove(), 600);
-                    }, 2000);
+                    if (!usedTimers.includes(first.id)) {
+                        let timer = new Timer(() => {
+                            div.children[0].style.opacity = "0";
+                            setTimeout(() => div.remove(), 600);
+                        }, 2000);
+
+                        timers.push(timer);
+                        usedTimers.push(first.id);
+                    } else {
+                        timers[usedTimers.indexOf(first.id)].reset(() => {
+                            div.children[0].style.opacity = "0";
+                            setTimeout(() => div.remove(), 600);
+                        }, 2000);
+                    }
                 } else {
                     alerts[0].innerHTML = html;
                     if (hiddenAlerts.includes(alerts[0]) == false) {
@@ -208,11 +221,14 @@ export const show = {
                             visibleAlerts++;
                         }
                     }
-                    setTimeout(() => {
+                    timers[usedTimers.indexOf(first.id)].reset(() => {
                         if (alerts[0] != null) {
                             alerts[0].children[0].style.opacity = "0";
-                            setTimeout(() => { if (alerts[0] != null) { alerts[0].remove(); } },
-                                600);
+                            setTimeout(() => {
+                                if (alerts[0] != null) {
+                                    alerts[0].remove();
+                                }
+                            }, 600);
                         }
                     }, 2000);
                 }
@@ -436,3 +452,60 @@ export const show = {
         return success;
     },
 };
+
+
+/**
+ * Timer - Class for starting, stoping and reseting setTimeout calls
+ */
+class Timer {
+    /**
+     * constructor - initiate and start the timeout
+     *
+     * @param {Function} fn What is going to happend after the timeout expires
+     * @param {number} t    What runtime the timeout will have
+     */
+    constructor(fn, t) {
+        this.fn = fn;
+        this.time = t;
+        this.timeout = setTimeout(fn, t);
+    }
+
+    /**
+     * stop - Clear timeout and reset value
+     * @returns {Timer} this
+     */
+    stop() {
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
+        return this;
+    }
+
+
+    /**
+     * start - Start timer using current settings (if it's not already running)
+     * @returns {Timer} this
+     */
+    start() {
+        if (!this.timeout) {
+            this.stop();
+            this.timeout = setTimeout(this.fn, this.time);
+        }
+        return this;
+    }
+
+
+    /**
+     * reset - Set new values for function and time, stop current timeout and start new timeout
+     * @param {Function} fn What is going to happend after the timeout expires
+     * @param {number} t    What time the timer will have
+     *
+     * @returns {Timer} this
+     */
+    reset(fn, t) {
+        this.fn = fn;
+        this.time = t;
+        return this.stop().start();
+    }
+}

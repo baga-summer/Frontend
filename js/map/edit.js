@@ -436,6 +436,10 @@ export const edit = {
             let index;
             let temp;
 
+            temp = findMyList(first, last);
+            list = temp.list;
+            index = temp.index;
+
             switch (first.constructor) {
                 case L.Polygon:
                     if (first.calculation.used == false) {
@@ -443,10 +447,6 @@ export const edit = {
 
                         let current = new StartData(first.id);
 
-                        temp = findMyList(first, last);
-
-                        list = temp.list;
-                        index = temp.index;
                         first.calculation.listIndex = index;
 
                         list.add(current.data);
@@ -455,11 +455,6 @@ export const edit = {
                     break;
 
                 case L.Marker:
-                    temp = findMyList(first, last);
-
-                    list = temp.list;
-                    index = temp.index;
-
                     if (list.ready && !last.calculation.used) {
                         temp = beginNewList(
                             list.pumpstation.id,
@@ -481,17 +476,26 @@ export const edit = {
                     }
                     break;
             }
-            if (list != null) {
-                switch (last.constructor) {
-                    case L.Marker:
-                        if (last.calculation.used == null) {
-                            last.calculation.used = true;
-                            last.calculation.listIndex = index;
-                            addMarkerToList(last, list);
-                        } else {
-                            if (list instanceof Array) {
-                                if (list[0] != list[1]) {
-                                    if (!list[0].end.status && list[0].pumpstation) {
+            switch (last.constructor) {
+                case L.Marker:
+                    if (last.calculation.used == null) {
+                        last.calculation.used = true;
+                        last.calculation.listIndex = index;
+                        addMarkerToList(last, list);
+                    } else {
+                        if (list instanceof Array) {
+                            list[0].concat(list[1]);
+                            last.calculation.listIndex = index[0];
+
+                            let temp = list[1].getAll();
+
+                            for (var i = 0; i < list[1].length; i++) {
+                                let current = all.find(find => find.id == temp[i].id);
+
+                                current.calculation.listIndex = index[0];
+                            }
+
+                            /*if (!list[0].end.status && list[0].pumpstation) {
                                         if (last instanceof L.Marker) {
                                             if (last.attributes != "Förgrening") {
                                                 addMarkerToList(last, list[0]);
@@ -505,22 +509,20 @@ export const edit = {
                                     } else if (!list[0].ready || !list[1].ready) {
                                         list[0].concat(list[1]);
                                         last.calculation.listIndex = index;
-                                    }
-                                }
-                                list = list[0];
-                                index = index[0];
-                            }
+                                    }*/
+                            list = list[0];
+                            index = index[0];
                         }
-                        break;
-                }
-                if (list.ready) {
-                    calculateList(list, all, allPolylines);
-                }
+                    }
+                    break;
+            }
+            if (list.ready) {
+                calculateList(list, all, allPolylines);
+            }
 
-                lists[index] = list;
-                if (list != undefined) {
-                    console.log(list.getAll());
-                }
+            lists[index] = list;
+            if (list != undefined) {
+                console.log(list.getAll());
             }
         }
     },
@@ -579,6 +581,11 @@ let findMyList = (first, last) => {
         };
     } else if (Number.isInteger(first.calculation.listIndex) &&
         !Number.isInteger(last.calculation.listIndex)) {
+        return {
+            list: lists[first.calculation.listIndex],
+            index: first.calculation.listIndex
+        };
+    } else if (first.calculation.listIndex == last.calculation.listIndex) {
         return {
             list: lists[first.calculation.listIndex],
             index: first.calculation.listIndex
@@ -669,28 +676,15 @@ let calculateList = (list, all, allPolylines) => {
     let vertices = list.sort();
     let usedVertices = [];
     let graph = createGraph(vertices, all, allPolylines, true);
+    let end = vertices[vertices.length - 1];
+    let pumpstation = list.pumpstation.id;
 
     // only for debugging
     graph.printGraph();
 
-    // go through every vertices
-    for (let i = 0; i < vertices.length - 1; i++) {
-        let current = vertices[i];
-        // get current element from all array
-
-        current = all.find(find => find.id == current);
-        // if current is a marker (pumpstation, branch connection or another product)
-        if (current instanceof L.Marker) {
-            calculateParents(current, all, graph, usedVertices);
-        }
-        calculateChildren(current, all, graph, usedVertices);
-    }
-
-    let end = vertices[vertices.length - 1];
-    let pumpstation = list.pumpstation.id;
-
     pumpstation = all.find(find => find.id == pumpstation);
-
+    calculateParents(pumpstation, all, graph, usedVertices, list);
+    pumpstation.calculation.capacity = checkFlow(pumpstation.calculation.nop);
     calculateLast(end, pumpstation, graph, all, polylines.getLayers());
 };
 
@@ -707,7 +701,7 @@ let calculateList = (list, all, allPolylines) => {
  * @returns {Graph} Returns created graph with edges
  */
 let createGraph = (vertices, all, allPolylines, reset) => {
-    let graph = new Graph(vertices.length);
+    let graph = new Graph();
     let queue = new Queue();
 
     for (let i = 0; i < vertices.length; i++) {
@@ -746,9 +740,8 @@ let createGraph = (vertices, all, allPolylines, reset) => {
 };
 
 /**
- * calculateParents - Check current parents if one or more element have not been used.
- * 					  If unused parent is found add nop (number of people) to current and add
- * 					  parent to used vertices
+ * calculateParents - Check current parents if it is type 0, if true add nop (number of people) to
+ * 					  current. If false, call same function with parent as current.
  *
  * @param {type} current      The child element
  * @param {type} all          All elements (houses, markers & polylines) currently placed on map
@@ -757,58 +750,30 @@ let createGraph = (vertices, all, allPolylines, reset) => {
  *
  * @returns {void}
  */
-let calculateParents = (current, all, graph, usedVertices) => {
+let calculateParents = (current, all, graph, usedVertices, list) => {
     let parents = graph.getParents(current.id);
 
     if (parents.length > 0) {
         for (let i = 0; i < parents.length; i++) {
             let parent = all.find(find => find.id == parents[i]);
+            let temp = list.get(list.indexOf(parent.id));
 
-            if (parent instanceof L.Marker && !usedVertices.includes(parent)) {
-                current.calculation.nop += parseFloat(parent.calculation.nop);
-                usedVertices.push(parent);
+            if (!usedVertices.includes(parent)) {
+                if (temp.type == 0) {
+                    let nop = parent instanceof L.Polygon ? parent.nop : parent.calculation.nop;
+
+                    current.calculation.nop += parseFloat(nop);
+                    usedVertices.push(parent);
+                } else {
+                    calculateParents(parent, all, graph, usedVertices, list);
+                    current.calculation.nop += parseFloat(parent.calculation.nop);
+                }
             }
         }
     }
-};
-
-
-/**
- * calculateChildren - Add nop (number of people) to all current children
- *
- * @param {type} current      The parent element
- * @param {type} all          All elements (houses, markers & polylines) currently placed on map
- * @param {type} graph        The graph that is being used for the calculations
- * @param {type} usedVertices A array with all vertices that have been used already
- *
- * @returns {void}
- */
-let calculateChildren = (current, all, graph, usedVertices) => {
-    // find children (vertices that are connected to current)
-    let children = graph.getChildren(current.id);
-
-    // if a child/children is found
-    if (children.length > 0) {
-        let nop = current instanceof L.Polygon ? current.nop : current.calculation.nop;
-
-        // go through every children
-        for (let j = 0; j < children.length; j++) {
-            let child = all.find(find => find.id == children[j]);
-
-            // if child is a pumpstation or branch connection
-            if (child instanceof L.Marker && !usedVertices.includes(child)) {
-                child.calculation.nop += parseFloat(nop);
-                usedVertices.push(current);
-            }
-
-            let flow = checkFlow(child.calculation.nop);
-
-            child.calculation.capacity = parseFloat(flow);
-
-            console.log("child: ", child.id);
-            console.log("nop", child.calculation.nop);
-        }
-    }
+    // only for debugging
+    console.log("current: ", current.id);
+    console.log("nop: ", current.calculation.nop);
 };
 
 /**
@@ -888,73 +853,99 @@ export let resetMarkers = (element) => {
     let allMarkersAndPolygons = markers.getLayers();
 
     allMarkersAndPolygons = allMarkersAndPolygons.concat(polygons.getLayers());
+    let allPolylines = polylines.getLayers();
 
     let first = allMarkersAndPolygons.find(find => find.id == element.connected_with.first);
     let last = allMarkersAndPolygons.find(find => find.id == element.connected_with.last);
 
-    if (last != null && last instanceof L.Marker) {
-        let list = findMyList(first, last);
 
-        list = list.list;
-        if (list instanceof Array) {
-            if (list[0] != list[1]) {
-                list[0].remove(list[0].indexOf(last.id));
-                if (!list[0].ready) {
-                    hideAlertsFromList(list[0].getAll());
-                }
+    let list = findMyList(first, last);
 
-                list[1].remove(list[1].indexOf(first.id));
+    list = list.list;
 
-                list = list[1];
-            } else {
-                list = list[0];
+    let oldGraph = createGraph(list.sort(), allMarkersAndPolygons, allPolylines, false);
 
-                // check if it is first or last that should be removed and reset values
-                let firstPolyline = findNextPolyline(first, 'last');
-                let lastPolyline = findNextPolyline(last, 'first');
+    element.connected_with.first = null;
+    element.connected_with.last = null;
 
-                if (firstPolyline == null) {
-                    list.remove(list.indexOf(first.id));
+    let graph = createGraph(list.sort(), allMarkersAndPolygons, allPolylines, false);
+    let current = graph.last();
 
-                    if (first instanceof L.Polygon) {
-                        first.calculation.used = false;
-                    } else if (first instanceof L.Marker) {
-                        first.calculation.used = null;
-                    }
-                    first.calculation.listIndex = null;
-                } else if (lastPolyline == null) {
-                    list.remove(list.indexOf(last.id));
-                    last.calculation.used = null;
-                    last.calculation.listIndex = null;
-                }
+    if (current == graph.first()) {
+        list.remove(list.indexOf(current));
+
+        let elem = allMarkersAndPolygons.find(find => find.id == current);
+
+        elem.calculation.used = first instanceof L.Polygon ? false : null;
+        elem.calculation.listIndex = null;
+    } else if (graph.getParents(current).length > 0) {
+        let child = current;
+        let newList = new LinkedList();
+
+        while (child != oldGraph.last()) {
+            child = oldGraph.getChildren(child);
+            child = child[0];
+
+            list.remove(list.indexOf(child));
+
+            // add to new list
+            let elem = allMarkersAndPolygons.find(find => find.id == child);
+
+            addMarkerToList(elem, newList);
+            elem.calculation.listIndex = lists.length;
+        }
+        if (newList.length > 1) {
+            lists[lists.length] = newList;
+            if (!newList.ready) {
+                hideAlertsFromList(newList.getAll());
             }
+            console.log(newList.getAll());
+        } else if (newList.length == 1) {
+            let elem = allMarkersAndPolygons.find(find => find.id == newList.head.data.id);
+
+            elem.calculation.used = null;
+            elem.calculation.listIndex = null;
         }
+    } else {
+        list.remove(list.indexOf(current));
 
-        // hide all alerts on pumpstations that are part of the list
-        if (!list.ready) {
-            hideAlertsFromList(list.getAll());
-        } else {
-            let allPolylines = polylines.getLayers();
-            let all = allMarkersAndPolygons;
+        let elem = allMarkersAndPolygons.find(find => find.id == current);
 
-            all = all.concat(allPolylines);
-
-            calculateList(list, all, allPolylines);
-        }
-        // check if there is a different list connected to the current list and set flow to false
-        if (!list.includesType(0)) {
-            checkNextList(list, false);
-        } else {
-            let allPolylines = polylines.getLayers();
-            let all = allMarkersAndPolygons;
-
-            all = all.concat(allPolylines);
-
-            checkNextList(list, true, all, allPolylines);
-        }
-
-        console.log(list.getAll());
+        elem.calculation.used = first instanceof L.Polygon ? false : null;
+        elem.calculation.listIndex = null;
     }
+
+    if (list.length == 1) {
+        let elem = allMarkersAndPolygons.find(find => find.id == list.head.data.id);
+
+        elem.calculation.used = elem instanceof L.Polygon ? false : null;
+        elem.calculation.listIndex = null;
+
+        list.remove(0);
+    }
+
+    if (!list.ready) {
+        hideAlertsFromList(list.getAll());
+    } else {
+        let all = allMarkersAndPolygons;
+
+        all = all.concat(allPolylines);
+        calculateList(list, all, allPolylines);
+    }
+    // check if there is a different list connected to the current list and set flow to false
+    if (!list.includesType(0)) {
+        if (list.length > 0) { checkNextList(list, false); }
+    } else {
+        let allPolylines = polylines.getLayers();
+        let all = allMarkersAndPolygons;
+
+        all = all.concat(allPolylines);
+
+        checkNextList(list, true, all, allPolylines);
+    }
+
+
+    console.log(list.getAll());
 };
 
 /**
@@ -994,7 +985,7 @@ let checkNextList = (list, value, all = null, allPolylines = null) => {
         let obj = allMarkers.find(find => find.id == list.end.id);
         let newList = lists[obj.calculation.listIndex];
 
-        if (newList != list) {
+        if (newList != list && newList != null) {
             newList.flow = value;
             hideAlertsFromList(newList.getAll());
 
