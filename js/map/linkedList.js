@@ -239,6 +239,11 @@ export class LinkedList {
 
         /**
          * compare - compare the two types and return the results
+         *
+         * @param {type} a The first element
+         * @param {type} b The other element
+         *
+         * @returns {number} the result
          */
         let compare = (a, b) => {
             if (a.type < b.type) {
@@ -248,8 +253,7 @@ export class LinkedList {
                 return 1;
             }
             return 0;
-        };
-
+        }
         return all.sort(compare);
     }
 
@@ -295,7 +299,6 @@ export class LinkedList {
 
         let current = this.find(index);
         // if found, remove it
-
         if (current !== null) {
             current.previous.next = current.next;
 
