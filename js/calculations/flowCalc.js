@@ -375,11 +375,11 @@ function recommendPump(pumps, height, selectedDim) {
                     div.className = "obj-container";
                     div.innerHTML =
                         `<div class="obj">
-							<img src="${pumps[i].Bild}"/>
-							</div>
-							<div class="obj-desc">${pumps[i].Modell}</div>
-							<img class="pumpCurve" src="${pumps[i].Bildkurva}"/>
-							<div class="obj-desc">${mps.toFixed(2)} m/s</div>`;
+                            <img src="${pumps[i].Bild}"/>
+                        </div>
+                        <div class="obj-desc">${pumps[i].Modell}</div>
+                        <img class="pumpCurve" src="${pumps[i].Bildkurva}"/>
+                        <div class="obj-desc">${mps.toFixed(2)} m/s</div>`;
 
                     parent = document.getElementById('pump-suggestions');
                     parent.appendChild(div);
