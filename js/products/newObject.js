@@ -39,7 +39,7 @@ let loadrequiredFields = async () => {
 
 
     main.innerHTML +=
-        `<br><label>Modell</label><br>
+        `<br><label>Modell namn</label><br>
 			 <input class="text-input" id="Modell" type="text"><br><br>
 			 <label>Produktbild</label><br>
 			 <img id="currentImage"/>
@@ -299,7 +299,7 @@ let newField = () => {
 
     div.className = 'newField';
     div.innerHTML =
-        `<input class="newKey text-input" type="text" placeholder="Titel">
+        `<input class="newKey text-input" type="text" placeholder="Attribut">
 		<input class="newInput text-input" type="text" placeholder="Värde">
 		<a class="removeButton button small-button danger-bt">Ta bort fält</a>`;
 
