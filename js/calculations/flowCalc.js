@@ -29,22 +29,26 @@ function showStyling() {
 
 // Changes material to the selected one
 document.getElementById("material").addEventListener("change", () => {
-    if (document.getElementById("material").value === "PEM" && document.getElementById("pressure1").checked == true) {
+    if (document.getElementById("material").value === "PEM" &&
+        document.getElementById("pressure1").checked == true) {
         PEMPipe();
         console.log('filled');
         document.getElementById("selectDim").style.display = "block";
     }
-    if (document.getElementById("material").value === "PEM" && document.getElementById("pressure1").checked == false) {
+    if (document.getElementById("material").value === "PEM" &&
+        document.getElementById("pressure1").checked == false) {
         emptyPipeDim();
         console.log('empty');
         document.getElementById("selectDim").style.display = "block";
     }
-    if (document.getElementById("material").value === "PE" && document.getElementById("pressure2").checked == true ) {
+    if (document.getElementById("material").value === "PE" &&
+        document.getElementById("pressure2").checked == true ) {
         PEPipe();
         console.log('filled');
         document.getElementById("selectDim").style.display = "block";
     }
-    if (document.getElementById("material").value === "PE" && document.getElementById("pressure2").checked == false ) {
+    if (document.getElementById("material").value === "PE" &&
+        document.getElementById("pressure2").checked == false ) {
         emptyPipeDim();
         console.log('empty');
         document.getElementById("selectDim").style.display = "block";
@@ -97,7 +101,7 @@ function PEMPipe() {
  *
  * @returns {void}
  */
-function emptyPipeDim () {
+function emptyPipeDim() {
     let select = document.getElementById("selectDim");
 
     for (let i = select.childNodes.length - 1; i >= 0; i--) {
