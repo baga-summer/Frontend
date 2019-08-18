@@ -172,14 +172,17 @@ let newPumpCurve = () => {
     div.innerHTML =
         `<br><label>Pumpkurva</label><br>
 	<input class="number-input newKey" id="height" type="number" step="0.1" placeholder="Höjd (m)">
-    <input class="number-input newInput" id="velocity"
-    type="number" step="0.1" placeholder="Flöde (l/s)">
+        <input class="number-input newInput" id="velocity"
+        type="number" step="0.1" placeholder="Flöde (l/s)">
 	<a class="button2 button small-button">Lägg till</a>
-	<a class="button3 button small-button" onclick = uploadCurve()>Ladda upp</a>
+        <input id="upload" type=file  name="files[]">
+
+
     <br><br>
 	<canvas id="myChart"></canvas>`;
 
     document.getElementById('Modell').after(div);
+    document.getElementById('upload').addEventListener('change', handleFileSelect, false);
 
     let ctx = document.getElementById('myChart').getContext('2d');
 
@@ -241,6 +244,7 @@ let newPumpCurve = () => {
         }
     });
 
+
     button.addEventListener('click', () => {
         if (velocity.value != "" && height.value != "") {
             let duplicate = false;
@@ -272,72 +276,88 @@ let newPumpCurve = () => {
     });
 
     button.addEventListener('click', () => {
-			console.log("etst");
+        console.log("etst");
     });
-
 };
+
 
 /**
  * Function for applying an excel document of the user's choosing.
  * No parameters are needed and the only thing returned is an indication of
  * success or failure.
  *
- * @returns bool
+ * @returns void
  */
 function uploadCurve() {
-	let success = false;
+    this.parseExcel = function(file) {
+        let reader = new FileReader();
 
-	let jObject = [{
-			"height": "2",
-			"pwd": 1
-		},{
-			"height": "4",
-			"pwd": 2
-		},{
-			"height": "5",
-			"pwd": 3
-		},{
-			"height": "6",
-			"pwd": 4
-		},{
-			"height": "9",
-			"pwd": 5
-		},{
-			"height": "14",
-			"pwd": 6
-		},{
-			"height": "15",
-			"pwd": 7
-		},{
-			"height": "18",
-			"pwd": 8
-		},{
-			"height": "19",
-			"pwd": 9
-		},{
-			"height": "22",
-			"pwd": 10
-		},{
-			"height": "24",
-			"pwd": 11
-		},{
-			"height": "29",
-			"pwd": 12
-		},{
-			"height": "33",
-			"pwd": 13
-		}];
+        reader.onload = function(e) {
+            let data = e.target.result;
+            let workbook = XLSX.read(data, {
+                type: 'binary'
+            });
 
-	for (let i = 0; i < jObject.length; i++) {
-		myLineChart.data.datasets[0].data.push({
-				x: jObject[i].height,
-				y: jObject[i].pwd
-		});
-		myLineChart.update();
-	}
+            workbook.SheetNames.forEach(function(sheetName) {
+                // Here is your object
+                let XLrowObject =
+                        XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+                let jsonObject = JSON.stringify(XLrowObject);
+                let obj = JSON.parse(jsonObject);
+                // modify the for loop to support various excel documents if all
+                // are not written in the same manner.
 
-	return success;
-}
+               // for (let i = 8; i < obj.length &&
+               //         !isNaN(obj[i].__EMPTY); i++) {
+               //     console.log(obj[i].__EMPTY,
+               //         'per second: ', (obj[i].__EMPTY_1 / 60).toFixed(2),
+               //         'per minute: ', obj[i].__EMPTY_1);
+               // }
+
+                for (var i = 8; i < obj.length &&
+                        !isNaN(obj[i].__EMPTY); i++) {
+                    myLineChart.data.datasets[0].data.push({
+                        x: obj[i].__EMPTY,
+                        y: (obj[i].__EMPTY_1 / 60)
+                    });
+                    myLineChart.update();
+                }
+                //console.log(jsonObject);
+                jQuery( '#xlx_json' ).val( jsonObject );
+            });
+        };
+        reader.onerror = function(ex) {
+            console.log(ex);
+        };
+
+        reader.readAsBinaryString(file);
+    };
+};
+
+///**
+// * Function for emptying the pumpcurve
+// *
+// * @returns void
+// */
+//function dropPumpCurve() {
+//    console.log("test");
+//    myLineChart.data.datasets.splice(0, 1);
+//    myLineChart.update();
+//}
+
+
+/**
+ * Function to tall on excel translation
+ *
+ * @param {FILE} file to be translated
+ * @returns {void}
+ */
+function handleFileSelect(evt) {
+    let files = evt.target.files; // FileList object
+    let xl2json = new uploadCurve();
+
+    xl2json.parseExcel(files[0]);
+};
 
 /**
  * Help function for array numeric sort

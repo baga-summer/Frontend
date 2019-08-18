@@ -1,1 +1,4 @@
 js/vendor
+js/products/jquery.min.js
+js/products/xlsx.js
+js/products/jszip.js
