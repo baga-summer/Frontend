@@ -367,9 +367,13 @@ function recommendPump(pumps, height, selectedDim) {
         if (!found) {
             if (height < pumps[i].Pumpkurva[0].y && height >
                 pumps[i].Pumpkurva[pumps[i].Pumpkurva.length - 1].y) {
+                console.log(pumps[i]);
                 mps = convertUnit(checkUnit(calculations.calcVelocity(
                     calculations.estPumpValue(height, pumps[i].Pumpkurva),
                     selectedDim)));
+                console.log("meters per second: ", mps);
+                console.log("",
+                    calculations.estPumpValue(height, pumps[i].Pumpkurva));
                 if (mps >= 0.6 && mps <= 3) {
                     div = document.createElement("div");
                     div.className = "obj-container";

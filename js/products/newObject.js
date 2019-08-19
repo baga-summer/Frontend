@@ -175,7 +175,7 @@ let newPumpCurve = () => {
         <input class="number-input newInput" id="velocity"
             type="number" step="0.1" placeholder="Flöde (l/s)">
 	<a class="button2 button small-button">Lägg till</a>
-        <br>
+        <br><label>Excel</label><br>
 	<input class="number-input newKey" id="heightID" type="string"
             placeholder="Kolumn namn för höjd">
         <input class="number-input newInput" id="velocityID"
@@ -320,6 +320,7 @@ function uploadCurve() {
 
                 if (obj[1].hasOwnProperty(heightName) && obj[1].hasOwnProperty(velocityName)) {
                     for (let i = 0; i < obj.length; i++) {
+                        console.log(obj[i][heightName], obj[i][velocityName]);
                         myLineChart.data.datasets[0].data.push({
                             x: obj[i][heightName],
                             y: (obj[i][velocityName])
@@ -327,6 +328,7 @@ function uploadCurve() {
                         myLineChart.update();
                     }
                 } else {
+                    console.log(obj);
                     for (var i = 8; i < obj.length &&
                             !isNaN(obj[i].__EMPTY); i++) {
                         myLineChart.data.datasets[0].data.push({
