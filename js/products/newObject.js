@@ -146,6 +146,9 @@ let newCategory = () => {
 		<input class="text-input" id="newCategoryInput" type="text">
 		 <label>Kategoriikon</label><br>
 		<img id="currentIcon"/>
+            <label for="iconFile" class="test-custom-file-upload">
+                Ladda upp
+            </label>
 	   <input id="iconFile" type="file" name="pic" accept=".png">`;
     document.getElementById('Kategori').after(div);
 
@@ -175,7 +178,10 @@ let newPumpCurve = () => {
         <input class="number-input newInput" id="velocity"
         type="number" step="0.1" placeholder="Flöde (l/s)">
 	<a class="button2 button small-button">Lägg till</a>
-        <input id="upload" type=file  name="files[]">
+        <label for="upload" class="custom-file-upload">
+            Ladda upp
+        </label>
+        <input class="button2" id="upload" type=file name="files[]" accept=".xls">
 
 
     <br><br>
@@ -307,12 +313,12 @@ function uploadCurve() {
                 // modify the for loop to support various excel documents if all
                 // are not written in the same manner.
 
-               // for (let i = 8; i < obj.length &&
-               //         !isNaN(obj[i].__EMPTY); i++) {
-               //     console.log(obj[i].__EMPTY,
-               //         'per second: ', (obj[i].__EMPTY_1 / 60).toFixed(2),
-               //         'per minute: ', obj[i].__EMPTY_1);
-               // }
+                // for (let i = 8; i < obj.length &&
+                //         !isNaN(obj[i].__EMPTY); i++) {
+                //     console.log(obj[i].__EMPTY,
+                //         'per second: ', (obj[i].__EMPTY_1 / 60).toFixed(2),
+                //         'per minute: ', obj[i].__EMPTY_1);
+                // }
 
                 for (var i = 8; i < obj.length &&
                         !isNaN(obj[i].__EMPTY); i++) {
@@ -332,7 +338,7 @@ function uploadCurve() {
 
         reader.readAsBinaryString(file);
     };
-};
+}
 
 ///**
 // * Function for emptying the pumpcurve
@@ -357,7 +363,7 @@ function handleFileSelect(evt) {
     let xl2json = new uploadCurve();
 
     xl2json.parseExcel(files[0]);
-};
+}
 
 /**
  * Help function for array numeric sort
