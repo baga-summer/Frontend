@@ -146,9 +146,6 @@ let newCategory = () => {
 		<input class="text-input" id="newCategoryInput" type="text">
 		 <label>Kategoriikon</label><br>
 		<img id="currentIcon"/>
-            <label for="iconFile" class="test-custom-file-upload">
-                Ladda upp
-            </label>
 	   <input id="iconFile" type="file" name="pic" accept=".png">`;
     document.getElementById('Kategori').after(div);
 
@@ -176,8 +173,13 @@ let newPumpCurve = () => {
         `<br><label>Pumpkurva</label><br>
 	<input class="number-input newKey" id="height" type="number" step="0.1" placeholder="Höjd (m)">
         <input class="number-input newInput" id="velocity"
-        type="number" step="0.1" placeholder="Flöde (l/s)">
+            type="number" step="0.1" placeholder="Flöde (l/s)">
 	<a class="button2 button small-button">Lägg till</a>
+        <br>
+	<input class="number-input newKey" id="heightID" type="string"
+            placeholder="Kolumn namn för höjd">
+        <input class="number-input newInput" id="velocityID"
+            type="string" placeholder="Kolumn namn för hastighet">
         <label for="upload" class="custom-file-upload">
             Ladda upp
         </label>
@@ -295,6 +297,8 @@ let newPumpCurve = () => {
  * @returns void
  */
 function uploadCurve() {
+    myLineChart.data.datasets[0].data = [];
+    myLineChart.update();
     this.parseExcel = function(file) {
         let reader = new FileReader();
 
@@ -305,30 +309,33 @@ function uploadCurve() {
             });
 
             workbook.SheetNames.forEach(function(sheetName) {
-                // Here is your object
                 let XLrowObject =
                         XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
                 let jsonObject = JSON.stringify(XLrowObject);
                 let obj = JSON.parse(jsonObject);
                 // modify the for loop to support various excel documents if all
                 // are not written in the same manner.
+                let heightName = document.getElementById("heightID").value;
+                let velocityName = document.getElementById("velocityID").value;
 
-                // for (let i = 8; i < obj.length &&
-                //         !isNaN(obj[i].__EMPTY); i++) {
-                //     console.log(obj[i].__EMPTY,
-                //         'per second: ', (obj[i].__EMPTY_1 / 60).toFixed(2),
-                //         'per minute: ', obj[i].__EMPTY_1);
-                // }
-
-                for (var i = 8; i < obj.length &&
-                        !isNaN(obj[i].__EMPTY); i++) {
-                    myLineChart.data.datasets[0].data.push({
-                        x: obj[i].__EMPTY,
-                        y: (obj[i].__EMPTY_1 / 60)
-                    });
-                    myLineChart.update();
+                if (obj[1].hasOwnProperty(heightName) && obj[1].hasOwnProperty(velocityName)) {
+                    for (let i = 0; i < obj.length; i++) {
+                        myLineChart.data.datasets[0].data.push({
+                            x: obj[i][heightName],
+                            y: (obj[i][velocityName])
+                        });
+                        myLineChart.update();
+                    }
+                } else {
+                    for (var i = 8; i < obj.length &&
+                            !isNaN(obj[i].__EMPTY); i++) {
+                        myLineChart.data.datasets[0].data.push({
+                            x: obj[i].__EMPTY,
+                            y: (obj[i].__EMPTY_1 / 60)
+                        });
+                        myLineChart.update();
+                    }
                 }
-                //console.log(jsonObject);
                 jQuery( '#xlx_json' ).val( jsonObject );
             });
         };
@@ -339,18 +346,6 @@ function uploadCurve() {
         reader.readAsBinaryString(file);
     };
 }
-
-///**
-// * Function for emptying the pumpcurve
-// *
-// * @returns void
-// */
-//function dropPumpCurve() {
-//    console.log("test");
-//    myLineChart.data.datasets.splice(0, 1);
-//    myLineChart.update();
-//}
-
 
 /**
  * Function to tall on excel translation
