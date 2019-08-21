@@ -413,7 +413,7 @@ const stringToNumber = (strValue) => {
     let ret = "No Number";
 
     for (let i = 0; i < number.length; i++) {
-        if (!isNaN(number[i]) && number[i] != "") {
+        if (!isNaN(number[i])) {
             return parseInt(number[i]);
         }
     }

@@ -7,7 +7,7 @@ import { options } from "./options.js";
 
 import { polylines, markers, polygons, add, getLength, clearHouse } from "./add.js";
 
-import { edit, calculateNextPolyline, checkFlow, findNextPolyline, resetMarkers } from "./edit.js";
+import { edit, calculateNextPolyline, findNextPolyline, resetMarkers, lists } from "./edit.js";
 
 import { show, mouseCoord } from "./show.js";
 
@@ -17,6 +17,7 @@ import { pipes } from "./pipes.js";
 
 export let guideline = null;
 export let mapId = 0;
+let lastUsedPipeValues = { type: "PEM", innerdim: "35.2 mm", outerdim: "40 mm", strokeWeight: "2" };
 
 /**
  * Marker - Class for creation of marker and underlying functionality for each object
@@ -42,6 +43,7 @@ export class Marker {
             .on("dragend", this.dragEnd)
             .on("drag", edit.moveMarker)
             .on('popupopen', this.updateCoords)
+            .on('popupclose', this.resetPipeColor)
             .on('remove', this.onRemove);
 
         if (data.id != null) {
@@ -104,6 +106,37 @@ export class Marker {
     }
 
     /**
+     * resetPipeColor - reset pipe colors to original colors
+     *
+     * @param {type} event
+     *
+     * @returns {void}
+     */
+    resetPipeColor(event) {
+        if (event.target.calculation.listIndex != null) {
+            let index = event.target.calculation.listIndex;
+            let all = markers.getLayers();
+
+            if (index instanceof Array) {
+                for (let i = 0; i < index.length - 1; i++) {
+                    if (lists[index[i]].ready) {
+                        let curr = lists[index[i]].pumpstation.element;
+
+                        show.pumpDistance(lists[index[i]], curr, all, polylines.getLayers(), true);
+                    }
+                }
+                index = index[index.length - 1];
+            }
+
+            if (lists[index].ready) {
+                let current = lists[index].pumpstation.element;
+
+                show.pumpDistance(lists[index], current, all, polylines.getLayers(), true);
+            }
+        }
+    }
+
+    /**
      * updateCoords - Updates markers coordinates from user input and updates popup content with
      * 			 	- the new coordinates
      *updateElevation
@@ -112,6 +145,38 @@ export class Marker {
      * @returns {void}
      */
     updateCoords(event) {
+        if (event.target.calculation.listIndex != null) {
+            let index = event.target.calculation.listIndex;
+            let all = markers.getLayers();
+
+            if (index instanceof Array) {
+                for (let i = 0; i < index.length - 1; i++) {
+                    if (lists[index[i]].ready) {
+                        let list = lists[index[i]];
+                        let curr = list.pumpstation.element;
+
+                        if (event.target.id == curr.id ||
+                            event.target.id == list.end.element.id &&
+                            event.target.attributes.Kategori != "Pumpstationer") {
+                            show.pumpDistance(list, curr, all, polylines.getLayers(), false);
+                        }
+                    }
+                }
+                index = index[index.length - 1];
+            }
+
+            if (lists[index].ready) {
+                let list = lists[index];
+                let current = lists[index].pumpstation.element;
+
+                if (event.target.id == current.id ||
+                    event.target.id == list.end.element.id &&
+                    event.target.attributes.Kategori != "Pumpstationer") {
+                    show.pumpDistance(list, current, all, polylines.getLayers(), false);
+                }
+            }
+        }
+
         // Get button after popup is open
         let buttons = document.getElementsByClassName('sendCoords');
 
@@ -340,8 +405,23 @@ export class Marker {
         let firstPolyline = temp.filter(find => find.connected_with.last == this.id);
         let lastPolyline = temp.filter(find => find.connected_with.first == this.id);
 
-        temp = markers.getLayers();
-        temp = temp.concat(polygons.getLayers());
+        if (this.calculation.listIndex != null) {
+            let index = this.calculation.listIndex;
+
+            if (index instanceof Array) {
+                for (let i = 0; i < index.length - 1; i++) {
+                    let list = lists[index[i]];
+
+                    list.remove(list.indexOf(this.id));
+                }
+                index = index[index.length - 1];
+            }
+
+            let list = lists[index];
+
+            list.remove(list.indexOf(this.id));
+            show.hideAlert(this);
+        }
 
         if (firstPolyline.length > 0 && lastPolyline.length > 0) {
             let restOf = [];
@@ -351,7 +431,6 @@ export class Marker {
             }
 
             lastPolyline = lastPolyline[0];
-
             let newLatlngs = firstPolyline[0]._latlngs;
 
             newLatlngs.pop();
@@ -360,92 +439,27 @@ export class Marker {
             for (let i = 0; i < lastPolyline._latlngs.length; i++) {
                 newLatlngs.push(lastPolyline._latlngs[i]);
             }
+
             firstPolyline[0].setLatLngs(newLatlngs);
-
             firstPolyline[0].connected_with.last = lastPolyline.connected_with.last;
-            polylines.removeLayer(lastPolyline);
 
+            lastPolyline.connected_with.first = null;
+            lastPolyline.connected_with.last = null;
+            polylines.removeLayer(lastPolyline);
             for (let i = 0; i < restOf.length; i++) {
                 polylines.removeLayer(restOf[i]);
             }
 
-            if (this.attributes.Kategori == "Förgrening") {
-                let first;
-                let last;
-                let restOf = [];
-
-                if (firstPolyline.length > 1) {
-                    first = [];
-                    for (let i = 0; i < firstPolyline.length; i++) {
-                        first = first.concat(temp.filter(find => find.id == firstPolyline[i]
-                            .connected_with.first));
-                    }
-                    let temp2 = first.shift();
-
-                    restOf = first;
-                    first = temp2;
-                } else {
-                    first = temp.find(find => find.id == firstPolyline[0].connected_with.first);
-                }
-
-                last = temp.find(find => find.id == firstPolyline[0].connected_with.last);
-
-                if (first != null) {
-                    if (first instanceof L.Polygon) {
-                        if (this.calculation.nop != last.calculation.nop) {
-                            if (restOf.length > 0) {
-                                for (let i = 0; i < restOf.length; i++) {
-                                    if (restOf[i] instanceof L.Polygon) {
-                                        last.calculation.nop -= parseInt(restOf[i].nop);
-                                    } else if (restOf[i] instanceof L.Marker) {
-                                        last.calculation.nop -= restOf[i].calculation.nop;
-                                    }
-                                }
-                            } else {
-                                last.calculation.nop -= parseInt(first.nop);
-                            }
-                            let flow = checkFlow(last.calculation.nop);
-
-                            last.calculation.capacity = parseFloat(flow);
-                            first.used = true;
-                        } else {
-                            last.calculation.nop = parseInt(first.nop);
-                            let flow = checkFlow(last.calculation.nop);
-
-                            last.calculation.capacity = parseFloat(flow);
-                            first.used = true;
-                        }
-                        edit.warning.pressure(firstPolyline[0]);
-                    } else {
-                        let next = findNextPolyline(first, 'last');
-
-                        if (next != null) {
-                            let first2 = temp.find(find => find.id == next.connected_with.first);
-
-                            if (first2 != null) {
-                                if (first2 instanceof L.Polygon) {
-                                    first.calculation.nop = parseInt(first2.nop);
-                                    let flow = checkFlow(first.calculation.nop);
-
-                                    last.calculation.capacity = parseFloat(flow);
-                                } else {
-                                    first.calculation.nop = first2.calculation.nop;
-                                    last.calculation.capacity = first2.calculation.nop;
-                                }
-                            }
-                        }
-                        edit.warning.pressure(firstPolyline[0]);
-                    }
-                }
-            }
+            edit.warning.pressure(firstPolyline[0]);
         } else if (firstPolyline.length > 0) {
             for (let i = 0; i < firstPolyline.length; i++) {
                 polylines.removeLayer(firstPolyline[i]);
             }
-        } else
-        if (lastPolyline.length > 0) {
-            for (let i = 0; i < lastPolyline.length; i++) {
-                polylines.removeLayer(lastPolyline[i]);
+        } else {
+            if (lastPolyline.length > 0) {
+                for (let i = 0; i < lastPolyline.length; i++) {
+                    polylines.removeLayer(lastPolyline[i]);
+                }
             }
         }
     }
@@ -472,7 +486,8 @@ export class House {
         this.completed = false;
         this.attributes = this.attributes;
         this.polygon = L.polygon([data.coordinates], options.house(data.popup.color));
-        this.polygon.used = false;
+        this.polygon.calculation = { used: false };
+        this.polygon.on('popupclose', this.resetPipeColor);
         this.polygon.on('remove', () => {
             let lastPolyline = findNextPolyline(this.polygon, 'first');
 
@@ -488,12 +503,6 @@ export class House {
         guideline = L.polyline([data.coordinates, data.coordinates], {
             dashArray: '5, 10'
         }).addTo(map);
-
-        this.polygon.stopDrawing = () => {
-            console.log("sho");
-            this.stopDrawing();
-        };
-
 
         map.on('mousemove', this.updateGuideLine);
         this.stopDrawListener();
@@ -539,7 +548,7 @@ export class House {
         this.polygon.nop = data.popup.nop;
         this.polygon.flow = data.popup.flow;
         this.polygon.id = data.id;
-        this.polygon.used = data.used;
+        this.polygon.calculation = data.calculation;
         this.completed = true;
 
         map.off('mousemove', this.updateGuideLine);
@@ -570,7 +579,6 @@ export class House {
         guideline.setLatLngs(coord);
     }
 
-
     /**
      * stopDrawListener - When user clicks the 'esc' button
      * 					- hides guideline and stops adding points to house object on click and
@@ -583,44 +591,56 @@ export class House {
         document.addEventListener("keyup", (event) => {
             // If user keyup is key 'esc'
             if (event.keyCode == 27) {
-                this.stopDrawing();
+                if (guideline != null && this.polygon != null && this.completed == false) {
+                    this.completed = true;
+                    let addr;
+
+                    L.esri.Geocoding.reverseGeocode()
+                        .latlng(this.polygon._latlngs[0][0])
+                        .run((error, result) => {
+                            addr = result.address.Match_addr;
+
+                            this.polygon.bindPopup(popup.house(
+                                addr,
+                                "Hus",
+                                projectInfo.default.peoplePerHouse,
+                                projectInfo.default.litrePerPerson,
+                                "#3388ff",
+                            ));
+
+                            this.polygon.address = addr;
+                        });
+
+                    this.polygon.definition = "Hus";
+                    this.polygon.nop = projectInfo.default.peoplePerHouse;
+                    this.polygon.flow = projectInfo.default.litrePerPerson;
+                    this.polygon.on('popupopen', this.updateValues);
+                    map.off('mousemove', this.updateGuideLine);
+                    guideline.remove();
+                    clearHouse();
+                }
             }
         }), { once: true };
     }
 
     /**
-     * stopDrawing - hides guideline and stops adding points to house object on click and
-     * 			   - adds popup content for house with address.
+     * resetPipeColor - reset pipe colors to original colors
+     *
+     * @param {type} event
+     *
      * @returns {void}
      */
-    stopDrawing() {
-        if (guideline != null && this.polygon != null && this.completed == false) {
-            this.completed = true;
-            let addr;
+    resetPipeColor(event) {
+        if (event.target.calculation.listIndex != null) {
+            let index = event.target.calculation.listIndex;
 
-            L.esri.Geocoding.reverseGeocode()
-                .latlng(this.polygon._latlngs[0][0])
-                .run((error, result) => {
-                    addr = result.address.Match_addr;
+            if (lists[index].ready) {
+                let all = markers.getLayers();
 
-                    this.polygon.bindPopup(popup.house(
-                        addr,
-                        "Hus",
-                        projectInfo.default.peoplePerHouse,
-                        projectInfo.default.litrePerPerson,
-                        "#3388ff",
-                    ));
+                all = all.concat(polygons.getLayers());
 
-                    this.polygon.address = addr;
-                });
-
-            this.polygon.definition = "Hus";
-            this.polygon.nop = projectInfo.default.peoplePerHouse;
-            this.polygon.flow = projectInfo.default.litrePerPerson;
-            this.polygon.on('popupopen', this.updateValues);
-            map.off('mousemove', this.updateGuideLine);
-            guideline.remove();
-            clearHouse();
+                show.pumpDistance(lists[index], event.target, all, polylines.getLayers(), true);
+            }
         }
     }
 
@@ -635,6 +655,17 @@ export class House {
     updateValues(event) {
         // Get button after popup is open
         let buttons = document.getElementsByClassName('updateValuesInHouse');
+
+
+        if (event.target.calculation.listIndex != null) {
+            let index = event.target.calculation.listIndex;
+
+            if (lists[index].ready) {
+                let all = markers.getLayers().concat(polygons.getLayers());
+
+                show.pumpDistance(lists[index], event.target, all, polylines.getLayers(), false);
+            }
+        }
 
         // Add event listener on click on button
         buttons[buttons.length - 1].addEventListener('click', () => {
@@ -655,24 +686,11 @@ export class House {
                 weight: 1.5
             });
 
-            let next = findNextPolyline(event.target, 'first');
-
-            if (next != null) {
-                let temp = markers.getLayers();
-
-                temp = temp.find(find => find.id == next.connected_with.last);
-                if (temp != null) {
-                    temp.calculation.nop -= event.target.nop;
-                }
-            }
             event.target.nop = nop;
             event.target.flow = flow;
             event.target.definition = type;
-            event.target.used = false;
             // Update popup content with new values
             event.target.setPopupContent(popup.house(addr, type, nop, flow, newColor));
-
-
             calculateNextPolyline(event.target, 'first');
         }), { once: true };
     }
@@ -722,7 +740,7 @@ export class Pipe {
             show.openModal(document.getElementById('pipeModal'));
             let elem = document.getElementsByClassName("material")[0];
 
-            pipes.listen(elem);
+            pipes.listen(elem, lastUsedPipeValues);
 
             this.elevation = await this.getElevation(this.latlngs);
 
@@ -840,6 +858,14 @@ export class Pipe {
         };
         this.eventObject.tilt = document.getElementById("tilt").value;
 
+
+        lastUsedPipeValues = {
+            type: this.eventObject.material,
+            innerdim: this.eventObject.dimension.inner,
+            outerdim: this.eventObject.dimension.outer,
+            strokeWeight: this.eventObject.dimension.strokeWeight
+        };
+
         this.eventObject.createPolyline();
         edit.warning.pressure(this.eventObject.polyline);
         add.clearStartPolyline();
@@ -859,7 +885,7 @@ export class Pipe {
         let material = document.getElementsByClassName("materialPopup");
 
         material = material[material.length - 1];
-        pipes.listen(material);
+        pipes.listen(material, lastUsedPipeValues);
         material.value = event.target.material;
         material.dispatchEvent(new Event('change'));
 
@@ -982,19 +1008,16 @@ export class Pipe {
      */
     onRemove() {
         let temp = markers.getLayers();
-        let houses = polygons.getLayers();
-        let first = temp.find(find => find.id == this.connected_with.first);
 
-        if (first != null) {
-            show.hideAlert(first);
-        } else {
-            first = houses.find(find => find.id == this.connected_with.first);
-            if (first != null) {
-                first.used = false;
-            }
+        temp.concat(polygons.getLayers());
+
+        let first = temp.find(find => find.id == this.connected_with.first);
+        let last = temp.find(find => find.id == this.connected_with.last);
+
+        if (first != null || last != null) {
+            resetMarkers(this);
         }
 
-        resetMarkers(this);
         this.decorator.remove();
     }
 }

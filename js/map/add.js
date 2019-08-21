@@ -17,6 +17,8 @@ import { map, icons, pipeChoice, objectData } from "./loadLeafletMap.js";
 // Imports three classes that are used for the project.
 import { Marker, House, Pipe } from "./classes.js";
 
+import { lists, addElementToList } from "./edit.js";
+
 export const add = {
     activeObjName: "",
     activeIcon: "",
@@ -98,7 +100,7 @@ export const add = {
                 firstTarget._path.classList.remove("polygon-stroke");
                 houseClicked = false;
             }
-        } else if (event.target.used == false || event.target.used == null) {
+        } else {
             point.id = target.id;
             if (target.length) {
                 point = addBranchConnection(event, target);
@@ -122,7 +124,7 @@ export const add = {
                 target._icon.classList.add("connect-icon");
                 firstTarget = target;
                 markerClicked = true;
-            } else if (target.address) {
+            } else if (target instanceof L.Polygon) {
                 target._path.classList.add("polygon-stroke");
                 firstTarget = target;
                 houseClicked = true;
@@ -229,7 +231,9 @@ let addBranchConnection = (event, target) => {
 
     firstLatlngs.push(event.latlng);
     target.setLatLngs(firstLatlngs);
+    target.length = getLength(firstLatlngs);
     target.decorator.setPaths(firstLatlngs);
+
 
     secondLatlngs.unshift(event.latlng);
 
@@ -249,8 +253,17 @@ let addBranchConnection = (event, target) => {
     let find = temp.find(find => find.id == target.connected_with.last);
 
     if (find != null) {
-        branchMarker.marker.capacity += parseFloat(find.capacity);
+        let index = find.calculation.listIndex;
+
+        if (Number.isInteger(index)) {
+            addElementToList(branchMarker.marker, lists[index], index);
+        } else if (index instanceof Array) {
+            for (let i = 0; i < index.length; i++) {
+                addElementToList(branchMarker.marker, lists[index[i]], index[i]);
+            }
+        }
     }
+
 
     newLine = {
         latlngs: secondLatlngs,

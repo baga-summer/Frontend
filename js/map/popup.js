@@ -11,7 +11,9 @@ export let popup = {
         ];
 
         let calculationInfo = [
-            "Totaltryck",
+            "Pumpsträcka",
+            "Total tryck",
+            "Tryck utifrån (10%)",
             "Flödeshastighet",
             "Antal personer som högst",
             "Flöde",
