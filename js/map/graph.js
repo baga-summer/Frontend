@@ -80,6 +80,42 @@ export class Graph {
     }
 
     /**
+     * isBefore - Checks if one vertex is before the other one
+     *
+     * @param {type} v The first vertex
+     * @param {type} w The other vertex
+     *
+     * @returns {boolean} the result
+     */
+    isBefore(v, w) {
+        let i = 0;
+        let pos1;
+        let pos2;
+        let current = this.first();
+        let end = this.last();
+
+        while (current.id != end.id) {
+            if (v == current.id) {
+                pos1 = i;
+            } else if (w == current.id) {
+                pos2 = i;
+            }
+            if (pos1 != null && pos2 != null) {break;}
+
+            i++;
+            current = this.getChild(current);
+            current = current[0];
+        }
+
+        if (v == current.id) {
+            pos1 = i;
+        } else if (w == current.id) {
+            pos2 = i;
+        }
+
+        return pos1 < pos2;
+    }
+    /**
      * last - Returns the last vertex, this is NOT the last vertex in the list.
      * 		- The last vertex is the vertex without any children (no next element after this)
      *
@@ -111,7 +147,7 @@ export class Graph {
         for (let key of keys) {
             let value = this.AdjacencyList.get(key);
 
-            if (v == value) {
+            if (value[0] != null && v === value[0].id) {
                 parents.push(key);
             }
         }
@@ -119,13 +155,13 @@ export class Graph {
     }
 
     /**
-     * getChildren - Get all children a vertex has
+     * getChild - Get the vertex child
      *
      * @param {type} v The parent vertex
      *
-     * @returns {Array} Returns a array of children found
+     * @returns {Array} Returns the child if found, else undefined
      */
-    getChildren(v) {
+    getChild(v) {
         return this.AdjacencyList.get(v);
     }
 
@@ -142,9 +178,9 @@ export class Graph {
             var values = this.AdjacencyList.get(key);
             var conc = "";
 
-            for (var j of values) { conc += j + " "; }
+            for (var j of values) { conc += j.id + " "; }
 
-            console.log(key + " -> " + conc);
+            console.log(key.id + " -> " + conc);
         }
     }
 }

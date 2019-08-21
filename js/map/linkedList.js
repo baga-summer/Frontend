@@ -28,9 +28,9 @@ export class LinkedList {
         this.head = null;
         this.tail = null;
         this.length = 0;
-        this.start = { status: false };
-        this.pumpstation = { status: false };
-        this.end = { status: false };
+        this.start = { status: false, element: {} };
+        this.pumpstation = { status: false, element: {} };
+        this.end = { status: false, element: {} };
         this.ready = false;
         this.flow = false;
     }
@@ -66,34 +66,29 @@ export class LinkedList {
                 if (!this.start.status) {
                     this.start.status = true;
                     this.flow = true;
-                    this.start.id = data.id;
-                    console.log("start");
+                    this.start.element = data.element;
                 }
                 break;
             case 2:
                 if (!this.pumpstation.status) {
                     this.pumpstation.status = true;
-                    this.pumpstation.id = data.id;
-                    console.log("pumpstation");
+                    this.pumpstation.element = data.element;
                 } else if (this.pumpstation.status && !this.end.status) {
                     this.end.status = true;
-                    this.end.id = data.id;
+                    this.end.element = data.element;
                     data.type = 3;
-                    console.log("end");
                 }
                 break;
             case 3:
                 if (!this.end.status && this.pumpstation.status) {
                     this.end.status = true;
-                    this.end.id = data.id;
-                    console.log("end");
+                    this.end.element = data.element;
                 }
                 break;
         }
 
         if (this.start.status && this.pumpstation.status && this.end.status && this.flow) {
             this.ready = true;
-            console.log("ready");
         }
     }
 
@@ -253,7 +248,8 @@ export class LinkedList {
                 return 1;
             }
             return 0;
-        }
+        };
+
         return all.sort(compare);
     }
 
@@ -283,7 +279,7 @@ export class LinkedList {
             }
 
             this.length--;
-            if (data.id == this.start.id) {
+            if (data.id == this.start.element.id) {
                 this.start.status = false;
                 this.flow = false;
                 this.ready = false;
@@ -293,12 +289,19 @@ export class LinkedList {
                 if (next) {
                     this.check(next.data);
                 }
+            } else if (data.id == this.pumpstation.element.id) {
+                this.pumpstation.status = false;
+                this.ready = false;
+            } else if (data.id == this.end.element.id) {
+                this.end.status = false;
+                this.ready = false;
             }
             return data;
         }
 
         let current = this.find(index);
         // if found, remove it
+
         if (current !== null) {
             current.previous.next = current.next;
 
@@ -310,7 +313,7 @@ export class LinkedList {
 
             this.length--;
 
-            if (current.data.id == this.start.id) {
+            if (current.data.id == this.start.element.id) {
                 this.start.status = false;
                 this.flow = false;
                 this.ready = false;
@@ -320,10 +323,10 @@ export class LinkedList {
                 if (next) {
                     this.check(next.data);
                 }
-            } else if (current.data.id == this.pumpstation.id) {
+            } else if (current.data.id == this.pumpstation.element.id) {
                 this.pumpstation.status = false;
                 this.ready = false;
-            } else if (current.data.id == this.end.id) {
+            } else if (current.data.id == this.end.element.id) {
                 this.end.status = false;
                 this.ready = false;
             }

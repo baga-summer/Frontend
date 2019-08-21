@@ -43,6 +43,7 @@ export class Marker {
             .on("dragend", this.dragEnd)
             .on("drag", edit.moveMarker)
             .on('popupopen', this.updateCoords)
+            .on('popupclose', this.resetPipeColor)
             .on('remove', this.onRemove);
 
         if (data.id != null) {
@@ -105,6 +106,37 @@ export class Marker {
     }
 
     /**
+     * resetPipeColor - reset pipe colors to original colors
+     *
+     * @param {type} event
+     *
+     * @returns {void}
+     */
+    resetPipeColor(event) {
+        if (event.target.calculation.listIndex != null) {
+            let index = event.target.calculation.listIndex;
+            let all = markers.getLayers();
+
+            if (index instanceof Array) {
+                for (let i = 0; i < index.length - 1; i++) {
+                    if (lists[index[i]].ready) {
+                        let curr = lists[index[i]].pumpstation.element;
+
+                        show.pumpDistance(lists[index[i]], curr, all, polylines.getLayers(), true);
+                    }
+                }
+                index = index[index.length - 1];
+            }
+
+            if (lists[index].ready) {
+                let current = lists[index].pumpstation.element;
+
+                show.pumpDistance(lists[index], current, all, polylines.getLayers(), true);
+            }
+        }
+    }
+
+    /**
      * updateCoords - Updates markers coordinates from user input and updates popup content with
      * 			 	- the new coordinates
      *updateElevation
@@ -113,6 +145,38 @@ export class Marker {
      * @returns {void}
      */
     updateCoords(event) {
+        if (event.target.calculation.listIndex != null) {
+            let index = event.target.calculation.listIndex;
+            let all = markers.getLayers();
+
+            if (index instanceof Array) {
+                for (let i = 0; i < index.length - 1; i++) {
+                    if (lists[index[i]].ready) {
+                        let list = lists[index[i]];
+                        let curr = list.pumpstation.element;
+
+                        if (event.target.id == curr.id ||
+                            event.target.id == list.end.element.id &&
+                            event.target.attributes.Kategori != "Pumpstationer") {
+                            show.pumpDistance(list, curr, all, polylines.getLayers(), false);
+                        }
+                    }
+                }
+                index = index[index.length - 1];
+            }
+
+            if (lists[index].ready) {
+                let list = lists[index];
+                let current = lists[index].pumpstation.element;
+
+                if (event.target.id == current.id ||
+                    event.target.id == list.end.element.id &&
+                    event.target.attributes.Kategori != "Pumpstationer") {
+                    show.pumpDistance(list, current, all, polylines.getLayers(), false);
+                }
+            }
+        }
+
         // Get button after popup is open
         let buttons = document.getElementsByClassName('sendCoords');
 
@@ -341,11 +405,19 @@ export class Marker {
         let firstPolyline = temp.filter(find => find.connected_with.last == this.id);
         let lastPolyline = temp.filter(find => find.connected_with.first == this.id);
 
-        temp = markers.getLayers();
-        temp = temp.concat(polygons.getLayers());
-
         if (this.calculation.listIndex != null) {
-            let list = lists[this.calculation.listIndex];
+            let index = this.calculation.listIndex;
+
+            if (index instanceof Array) {
+                for (let i = 0; i < index.length - 1; i++) {
+                    let list = lists[index[i]];
+
+                    list.remove(list.indexOf(this.id));
+                }
+                index = index[index.length - 1];
+            }
+
+            let list = lists[index];
 
             list.remove(list.indexOf(this.id));
             show.hideAlert(this);
@@ -374,18 +446,20 @@ export class Marker {
             lastPolyline.connected_with.first = null;
             lastPolyline.connected_with.last = null;
             polylines.removeLayer(lastPolyline);
-
             for (let i = 0; i < restOf.length; i++) {
                 polylines.removeLayer(restOf[i]);
             }
-        } else if (firstPolyline.length > 0) { // måste testas
+
+            edit.warning.pressure(firstPolyline[0]);
+        } else if (firstPolyline.length > 0) {
             for (let i = 0; i < firstPolyline.length; i++) {
                 polylines.removeLayer(firstPolyline[i]);
             }
-        } else
-        if (lastPolyline.length > 0) {
-            for (let i = 0; i < lastPolyline.length; i++) { // måste testas
-                polylines.removeLayer(lastPolyline[i]);
+        } else {
+            if (lastPolyline.length > 0) {
+                for (let i = 0; i < lastPolyline.length; i++) {
+                    polylines.removeLayer(lastPolyline[i]);
+                }
             }
         }
     }
@@ -413,6 +487,7 @@ export class House {
         this.attributes = this.attributes;
         this.polygon = L.polygon([data.coordinates], options.house(data.popup.color));
         this.polygon.calculation = { used: false };
+        this.polygon.on('popupclose', this.resetPipeColor);
         this.polygon.on('remove', () => {
             let lastPolyline = findNextPolyline(this.polygon, 'first');
 
@@ -473,7 +548,7 @@ export class House {
         this.polygon.nop = data.popup.nop;
         this.polygon.flow = data.popup.flow;
         this.polygon.id = data.id;
-        this.polygon.calculation = { used: data.used };
+        this.polygon.calculation = data.calculation;
         this.completed = true;
 
         map.off('mousemove', this.updateGuideLine);
@@ -549,6 +624,27 @@ export class House {
     }
 
     /**
+     * resetPipeColor - reset pipe colors to original colors
+     *
+     * @param {type} event
+     *
+     * @returns {void}
+     */
+    resetPipeColor(event) {
+        if (event.target.calculation.listIndex != null) {
+            let index = event.target.calculation.listIndex;
+
+            if (lists[index].ready) {
+                let all = markers.getLayers();
+
+                all = all.concat(polygons.getLayers());
+
+                show.pumpDistance(lists[index], event.target, all, polylines.getLayers(), true);
+            }
+        }
+    }
+
+    /**
      * updateValues - Updates house values from user input and updates popup content with
      * 			 	- the new values
      *
@@ -559,6 +655,17 @@ export class House {
     updateValues(event) {
         // Get button after popup is open
         let buttons = document.getElementsByClassName('updateValuesInHouse');
+
+
+        if (event.target.calculation.listIndex != null) {
+            let index = event.target.calculation.listIndex;
+
+            if (lists[index].ready) {
+                let all = markers.getLayers().concat(polygons.getLayers());
+
+                show.pumpDistance(lists[index], event.target, all, polylines.getLayers(), false);
+            }
+        }
 
         // Add event listener on click on button
         buttons[buttons.length - 1].addEventListener('click', () => {

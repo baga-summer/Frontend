@@ -15,7 +15,7 @@ import { polylines, add } from "./add.js";
 import { popup } from "./popup.js";
 
 // Imports the edit file.
-import { edit } from "./edit.js";
+import { edit, createGraph, findNextPolyline } from "./edit.js";
 
 export const show = {
 
@@ -155,6 +155,54 @@ export const show = {
     },
 
     /**
+     * pumpDistance - change colors to all polylines after pumpstation.
+     * 				- This helps to visulize which distance the pumpstation is pumping
+     * 				- function is also used to reset colors to original colors when popup is closed
+     *
+     * @param {type} pumpstation  The pumpstation that we begin fromw
+     * @param {type} list         the list the pumpstation is part of
+     * @param {type} all          All elements (houses, markers & polylines) currently placed on map
+     * @param {type} allPolylines All polylines currently placed on map
+     * @param {type} reset        boolean value that tells which colors it should use
+     *
+     * @returns {void}
+     */
+    pumpDistance: (list, first, all, allPolylines, reset) => {
+        let vertices = list.getAll();
+        let graph = createGraph(vertices, all, allPolylines, false);
+
+        while (first != null && first.id != graph.last().id) {
+            if (first == null) {
+                break;
+            }
+            let polyline = findNextPolyline(first, 'first');
+
+            if (!reset) {
+                polyline.setStyle({
+                    color: '#ff00f4'
+                });
+                polyline.decorator.setStyle({
+                    color: '#7f007a'
+                });
+                polyline.decorator._patterns[0].symbolFactory.options.pathOptions.color = '#7f007a';
+            } else {
+                let color = polyline.type == 0 ? '#3388ff' : 'red';
+
+                polyline.setStyle({
+                    color: color
+                });
+                polyline.decorator.setStyle({
+                    color: '#004377'
+                });
+                polyline.decorator._patterns[0].symbolFactory.options.pathOptions.color = '#004377';
+            }
+
+            first = graph.getChild(first);
+            first = first[0];
+        }
+    },
+
+    /**
      * alert - Displays warnings when pressure is too high or too low.
      *
      * @param {object} first
@@ -171,7 +219,9 @@ export const show = {
         let cap = 3;
 
         first.attributes.id = first.id;
-        first.attributes.Totaltryck = result.totalPressure.toFixed(2) + " m";
+        first.attributes.Pumpsträcka = result.pumpDistance.toFixed(2) + " m";
+        first.attributes["Total tryck"] = result.totalPressure.toFixed(2) + " m";
+        first.attributes["Tryck utifrån (10%)"] = result.additionalPressure.toFixed(2) + " m";
         first.attributes.Flödeshastighet = result.calculations.mps.toFixed(2) + " m/s";
         first.attributes["Antal personer som högst"] = result.nop;
         first.attributes.Flöde = result.capacity * 1000 + " l/s";
@@ -221,16 +271,26 @@ export const show = {
                             visibleAlerts++;
                         }
                     }
-                    timers[usedTimers.indexOf(first.id)].reset(() => {
-                        if (alerts[0] != null) {
+                    if (!usedTimers.includes(first.id)) {
+                        let timer = new Timer(() => {
                             alerts[0].children[0].style.opacity = "0";
-                            setTimeout(() => {
-                                if (alerts[0] != null) {
-                                    alerts[0].remove();
-                                }
-                            }, 600);
-                        }
-                    }, 2000);
+                            setTimeout(() => alerts[0].remove(), 600);
+                        }, 2000);
+
+                        timers.push(timer);
+                        usedTimers.push(first.id);
+                    } else {
+                        timers[usedTimers.indexOf(first.id)].reset(() => {
+                            if (alerts[0] != null) {
+                                alerts[0].children[0].style.opacity = "0";
+                                setTimeout(() => {
+                                    if (alerts[0] != null) {
+                                        alerts[0].remove();
+                                    }
+                                }, 600);
+                            }
+                        }, 2000);
+                    }
                 }
 
                 first._icon.classList.remove('warning-icon');
@@ -256,6 +316,10 @@ export const show = {
                     parent.appendChild(div);
                 } else {
                     alerts[0].innerHTML = html;
+
+                    if (usedTimers.includes(first.id)) {
+                        timers[usedTimers.indexOf(first.id)].stop();
+                    }
                 }
 
                 first._icon.classList.remove('alert-icon');
@@ -282,6 +346,10 @@ export const show = {
                     parent.appendChild(div);
                 } else {
                     alerts[0].innerHTML = html;
+
+                    if (usedTimers.includes(first.id)) {
+                        timers[usedTimers.indexOf(first.id)].stop();
+                    }
                 }
 
                 first._icon.classList.remove('alert-icon');
@@ -307,6 +375,10 @@ export const show = {
                     parent.appendChild(div);
                 } else {
                     alerts[0].innerHTML = html;
+
+                    if (usedTimers.includes(first.id)) {
+                        timers[usedTimers.indexOf(first.id)].stop();
+                    }
                 }
 
                 first._icon.classList.remove('warning-icon');
@@ -333,6 +405,10 @@ export const show = {
                     parent.appendChild(div);
                 } else {
                     alerts[0].innerHTML = html;
+
+                    if (usedTimers.includes(first.id)) {
+                        timers[usedTimers.indexOf(first.id)].stop();
+                    }
                 }
 
                 first._icon.classList.remove('warning-icon');

@@ -17,9 +17,7 @@ import { map, icons, pipeChoice, objectData } from "./loadLeafletMap.js";
 // Imports three classes that are used for the project.
 import { Marker, House, Pipe } from "./classes.js";
 
-import { BranchConnData } from "./calculationClasses.js";
-
-import { lists } from "./edit.js";
+import { lists, addElementToList } from "./edit.js";
 
 export const add = {
     activeObjName: "",
@@ -233,7 +231,9 @@ let addBranchConnection = (event, target) => {
 
     firstLatlngs.push(event.latlng);
     target.setLatLngs(firstLatlngs);
+    target.length = getLength(firstLatlngs);
     target.decorator.setPaths(firstLatlngs);
+
 
     secondLatlngs.unshift(event.latlng);
 
@@ -253,12 +253,14 @@ let addBranchConnection = (event, target) => {
     let find = temp.find(find => find.id == target.connected_with.last);
 
     if (find != null) {
-        if (Number.isInteger(find.calculation.listIndex)) {
-            let current = new BranchConnData(branchMarker.marker.id);
+        let index = find.calculation.listIndex;
 
-            lists[find.calculation.listIndex].add(current.data);
-            branchMarker.marker.calculation.listIndex = find.calculation.listIndex;
-            branchMarker.marker.calculation.used = true;
+        if (Number.isInteger(index)) {
+            addElementToList(branchMarker.marker, lists[index], index);
+        } else if (index instanceof Array) {
+            for (let i = 0; i < index.length; i++) {
+                addElementToList(branchMarker.marker, lists[index[i]], index[i]);
+            }
         }
     }
 

@@ -4,12 +4,13 @@
  */
 export class StartData {
     /**
-     * constructor - Saves the id of the selected element and adds the selected type
-     * @param {number} id The unique number of selected element
+     * constructor - Saves the element of the selected element and adds the selected type
+     * @param {object} elem The selected element
      */
-    constructor(id) {
+    constructor(elem) {
         this.data = {
-            id: id,
+            id: elem.id,
+            element: elem,
             type: 0,
         };
     }
@@ -21,12 +22,13 @@ export class StartData {
  */
 export class PumpstationData {
     /**
-     * constructor - Saves the id of the selected element and adds the selected type
-     * @param {number} id The unique number of selected element
+     * constructor - Saves the element of the selected element and adds the selected type
+     * @param {object} elem The selected element
      */
-    constructor(id) {
+    constructor(elem) {
         this.data = {
-            id: id,
+            id: elem.id,
+            element: elem,
             type: 2,
         };
     }
@@ -38,12 +40,13 @@ export class PumpstationData {
  */
 export class BranchConnData {
     /**
-     * constructor - Saves the id of the selected element and adds the selected type
-     * @param {number} id The unique number of selected element
+     * constructor - Saves the element of the selected element and adds the selected type
+     * @param {object} elem The selected element
      */
-    constructor(id) {
+    constructor(elem) {
         this.data = {
-            id: id,
+            id: elem.id,
+            element: elem,
             type: 1,
         };
     }
@@ -56,12 +59,13 @@ export class BranchConnData {
  */
 export class DefaultData {
     /**
-     * constructor - Saves the id of the selected element and adds the selected type
-     * @param {number} id The unique number of selected element
+     * constructor - Saves the element of the selected element and adds the selected type
+     * @param {object} elem The selected element
      */
-    constructor(id) {
+    constructor(elem) {
         this.data = {
-            id: id,
+            id: elem.id,
+            element: elem,
             type: 3,
         };
     }
