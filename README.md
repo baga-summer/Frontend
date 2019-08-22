@@ -1,4 +1,4 @@
-# Vattenbagarna Planning Plumbing Program
+# Planning Plumbing Program
 
 # Usage with Google maps
 To make this project work you'll need to supply your own Google maps API key.
