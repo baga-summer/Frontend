@@ -7,13 +7,13 @@
  * @returns {void}
  */
 function showStyling() {
-    // document.getElementById("pressure1").style.display = "block";
-    // document.getElementById("pressure2").style.display = "block";
+    document.getElementById("pressure1").style.display = "block";
+    document.getElementById("pressure2").style.display = "block";
     document.getElementById("flow").style.display = "block";
     document.getElementById("flow-wrap").style.display = "flex";
     document.getElementById("submit").style.display = "block";
-    // document.getElementById("pressure1").previousElementSibling.innerText = "PN 6.3";
-    // document.getElementById("pressure2").previousElementSibling.innerText = "PN 10";
+    document.getElementById("pressure1").previousElementSibling.innerText = "PN 6.3";
+    document.getElementById("pressure2").previousElementSibling.innerText = "PN 10";
 }
 
 /**
@@ -29,12 +29,24 @@ function showStyling() {
 
 // Changes material to the selected one
 document.getElementById("material").addEventListener("change", () => {
-    if (document.getElementById("material").value === "PEM") {
+    if (document.getElementById("material").value === "PEM" &&
+        document.getElementById("pressure1").checked == true) {
         PEMPipe();
         document.getElementById("selectDim").style.display = "block";
     }
-    if (document.getElementById("material").value === "PE") {
+    if (document.getElementById("material").value === "PEM" &&
+        document.getElementById("pressure1").checked == false) {
+        emptyPipeDim();
+        document.getElementById("selectDim").style.display = "block";
+    }
+    if (document.getElementById("material").value === "PE" &&
+        document.getElementById("pressure2").checked == true ) {
         PEPipe();
+        document.getElementById("selectDim").style.display = "block";
+    }
+    if (document.getElementById("material").value === "PE" &&
+        document.getElementById("pressure2").checked == false ) {
+        emptyPipeDim();
         document.getElementById("selectDim").style.display = "block";
     }
     if (document.getElementById("material").value === "stainless") {
@@ -77,6 +89,19 @@ function PEMPipe() {
 
         option.text = dimPEM[i].outerdim;
         select.add(option);
+    }
+}
+
+/**
+ * emptyPipeDim - Empties the list of available dimensions.
+ *
+ * @returns {void}
+ */
+function emptyPipeDim() {
+    let select = document.getElementById("selectDim");
+
+    for (let i = select.childNodes.length - 1; i >= 0; i--) {
+        select.removeChild(select.childNodes[i]);
     }
 }
 
@@ -230,9 +255,9 @@ function calcAll() {
 
     getPumps(totalPress, selectedDim);
 
-    let roundVel = velocity.toFixed(2);
-    let roundPress = lostPress.toFixed(2);
-    let roundTotal = totalPress.toFixed(2);
+    let roundVel = velocity.toFixed(1);
+    let roundPress = lostPress.toFixed(1);
+    let roundTotal = totalPress.toFixed(1);
 
     if (roundTotal == "NaN" || roundTotal < 0 ||
         roundPress == "NaN" || roundPress < 0 ||
@@ -350,11 +375,11 @@ function recommendPump(pumps, height, selectedDim) {
                     div.className = "obj-container";
                     div.innerHTML =
                         `<div class="obj">
-							<img src="${pumps[i].Bild}"/>
-							</div>
-							<div class="obj-desc">${pumps[i].Modell}</div>
-							<img class="pumpCurve" src="${pumps[i].Bildkurva}"/>
-							<div class="obj-desc">${mps.toFixed(2)} m/s</div>`;
+                            <img src="${pumps[i].Bild}"/>
+                        </div>
+                        <div class="obj-desc">${pumps[i].Modell}</div>
+                        <img class="pumpCurve" src="${pumps[i].Bildkurva}"/>
+                        <div class="obj-desc">${mps.toFixed(2)} m/s</div>`;
 
                     parent = document.getElementById('pump-suggestions');
                     parent.appendChild(div);
@@ -375,11 +400,11 @@ function recommendPump(pumps, height, selectedDim) {
                     div.className = "obj-container";
                     div.innerHTML =
                         `<div class="obj">
-							<img src="${pumps[i].Bild}"/>
-							</div>
-							<div class="obj-desc">${pumps[i].Modell}</div>
-							<img class="pumpCurve" src="${pumps[i].Bildkurva}"/>
-							<div class="obj-desc">${mps.toFixed(2)} m/s</div>`;
+                            <img src="${pumps[i].Bild}"/>
+                        </div>
+                        <div class="obj-desc">${pumps[i].Modell}</div>
+                        <img class="pumpCurve" src="${pumps[i].Bildkurva}"/>
+                        <div class="obj-desc">${mps.toFixed(2)} m/s</div>`;
 
                     parent = document.getElementById('pump-suggestions');
                     parent.appendChild(div);
