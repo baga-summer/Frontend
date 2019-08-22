@@ -19,7 +19,7 @@ let loadrequiredFields = async () => {
 
     main.innerHTML +=
         `<label>Kategori</label><br>
-				<select class="select-input" id="Kategori">
+                <select class="select-input" id="Kategori">
                 <option disabled selected></option></select><br>`;
 
     let select = document.getElementById("Kategori");
