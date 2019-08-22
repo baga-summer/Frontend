@@ -9,7 +9,7 @@ To make this project work you'll need to supply your own Google maps API key.
 
 
 # Workflow
-- clone the repo `git@github.com:vattenbagarna/Frontend.git`
+- clone the repo
 - install npm modules (this is required for code linting) `npm install`
 - code
 - run `npm test` to run linters etc.
