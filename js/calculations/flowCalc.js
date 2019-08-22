@@ -32,25 +32,21 @@ document.getElementById("material").addEventListener("change", () => {
     if (document.getElementById("material").value === "PEM" &&
         document.getElementById("pressure1").checked == true) {
         PEMPipe();
-        console.log('filled');
         document.getElementById("selectDim").style.display = "block";
     }
     if (document.getElementById("material").value === "PEM" &&
         document.getElementById("pressure1").checked == false) {
         emptyPipeDim();
-        console.log('empty');
         document.getElementById("selectDim").style.display = "block";
     }
     if (document.getElementById("material").value === "PE" &&
         document.getElementById("pressure2").checked == true ) {
         PEPipe();
-        console.log('filled');
         document.getElementById("selectDim").style.display = "block";
     }
     if (document.getElementById("material").value === "PE" &&
         document.getElementById("pressure2").checked == false ) {
         emptyPipeDim();
-        console.log('empty');
         document.getElementById("selectDim").style.display = "block";
     }
     if (document.getElementById("material").value === "stainless") {
