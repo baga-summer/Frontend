@@ -283,9 +283,6 @@ let newPumpCurve = () => {
         }
     });
 
-    button.addEventListener('click', () => {
-        console.log("etst");
-    });
 };
 
 
@@ -320,7 +317,6 @@ function uploadCurve() {
 
                 if (obj[1].hasOwnProperty(heightName) && obj[1].hasOwnProperty(velocityName)) {
                     for (let i = 0; i < obj.length; i++) {
-                        console.log(obj[i][heightName], obj[i][velocityName]);
                         myLineChart.data.datasets[0].data.push({
                             x: obj[i][heightName],
                             y: (obj[i][velocityName])
@@ -328,7 +324,6 @@ function uploadCurve() {
                         myLineChart.update();
                     }
                 } else {
-                    console.log(obj);
                     for (var i = 8; i < obj.length &&
                             !isNaN(obj[i].__EMPTY); i++) {
                         myLineChart.data.datasets[0].data.push({
