@@ -1,8 +1,9 @@
 // Changes material to the selected one
 export let pipes = {
-    listen: (elem) => {
+    listen: (elem, lastUsed) => {
         elem.addEventListener("change", () => {
             let data;
+            let option;
 
             pipes.clear();
             if (elem.value === "PEM") {
@@ -20,10 +21,18 @@ export let pipes = {
             let select = document.createElement('select');
 
             select.className = "dimension select-input";
-            let option;
+
+            if (elem.value == lastUsed.type) {
+                option = document.createElement("option");
+                option.text = lastUsed.outerdim;
+                option.value =
+                    `${lastUsed.innerdim},${lastUsed.outerdim},${lastUsed.strokeWeight}`;
+
+                select.add(option);
+            }
 
             for (let i = 0; i < data.length; i++) {
-                if (data[i].outerdim != null) {
+                if (data[i].outerdim != null && data[i].outerdim != lastUsed.outerdim) {
                     option = document.createElement("option");
                     option.text = data[i].outerdim;
                     option.value =
@@ -40,7 +49,7 @@ export let pipes = {
 
             referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
         });
-        elem.value = "PEM";
+        elem.value = lastUsed.type;
         elem.dispatchEvent(new Event('change'));
     },
 

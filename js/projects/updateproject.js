@@ -254,7 +254,9 @@ updateProjectButton.addEventListener("click", () => {
 });
 
 deleteProjectButton.addEventListener("click", () => {
-    deleteProject();
+    if (confirm("Är du säker på att du vill ta bort projektet?")) {
+        deleteProject();
+    }
 });
 
 addEventListener("DOMContentLoaded", () => {
