@@ -172,13 +172,25 @@ let newPumpCurve = () => {
     div.innerHTML =
         `<br><label>Pumpkurva</label><br>
 	<input class="number-input newKey" id="height" type="number" step="0.1" placeholder="Höjd (m)">
-    <input class="number-input newInput" id="velocity"
-    type="number" step="0.1" placeholder="Flöde (l/s)">
+        <input class="number-input newInput" id="velocity"
+            type="number" step="0.1" placeholder="Flöde (l/s)">
 	<a class="button2 button small-button">Lägg till</a>
+        <br><label>Excel</label><br>
+	<input class="number-input newKey" id="heightID" type="string"
+            placeholder="Kolumn namn för höjd">
+        <input class="number-input newInput" id="velocityID"
+            type="string" placeholder="Kolumn namn för hastighet">
+        <label for="upload" class="custom-file-upload">
+            Ladda upp
+        </label>
+        <input class="button2" id="upload" type=file name="files[]" accept=".xls">
+
+
     <br><br>
 	<canvas id="myChart"></canvas>`;
 
     document.getElementById('Modell').after(div);
+    document.getElementById('upload').addEventListener('change', handleFileSelect, false);
 
     let ctx = document.getElementById('myChart').getContext('2d');
 
@@ -240,6 +252,7 @@ let newPumpCurve = () => {
         }
     });
 
+
     button.addEventListener('click', () => {
         if (velocity.value != "" && height.value != "") {
             let duplicate = false;
@@ -270,6 +283,78 @@ let newPumpCurve = () => {
         }
     });
 };
+
+
+/**
+ * Function for applying an excel document of the user's choosing.
+ * No parameters are needed and the only thing returned is an indication of
+ * success or failure.
+ *
+ * @returns void
+ */
+function uploadCurve() {
+    myLineChart.data.datasets[0].data = [];
+    myLineChart.update();
+    this.parseExcel = function(file) {
+        let reader = new FileReader();
+
+        reader.onload = function(e) {
+            let data = e.target.result;
+            let workbook = XLSX.read(data, {
+                type: 'binary'
+            });
+
+            workbook.SheetNames.forEach(function(sheetName) {
+                let XLrowObject =
+                        XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+                let jsonObject = JSON.stringify(XLrowObject);
+                let obj = JSON.parse(jsonObject);
+                // modify the for loop to support various excel documents if all
+                // are not written in the same manner.
+                let heightName = document.getElementById("heightID").value;
+                let velocityName = document.getElementById("velocityID").value;
+
+                if (obj[1].hasOwnProperty(heightName) && obj[1].hasOwnProperty(velocityName)) {
+                    for (let i = 0; i < obj.length; i++) {
+                        myLineChart.data.datasets[0].data.push({
+                            x: obj[i][heightName],
+                            y: (obj[i][velocityName])
+                        });
+                        myLineChart.update();
+                    }
+                } else {
+                    for (var i = 8; i < obj.length &&
+                            !isNaN(obj[i].__EMPTY); i++) {
+                        myLineChart.data.datasets[0].data.push({
+                            x: obj[i].__EMPTY,
+                            y: (obj[i].__EMPTY_1 / 60)
+                        });
+                        myLineChart.update();
+                    }
+                }
+                jQuery( '#xlx_json' ).val( jsonObject );
+            });
+        };
+        reader.onerror = function(ex) {
+            console.log(ex);
+        };
+
+        reader.readAsBinaryString(file);
+    };
+}
+
+/**
+ * Function to tall on excel translation
+ *
+ * @param {FILE} file to be translated
+ * @returns {void}
+ */
+function handleFileSelect(evt) {
+    let files = evt.target.files; // FileList object
+    let xl2json = new uploadCurve();
+
+    xl2json.parseExcel(files[0]);
+}
 
 /**
  * Help function for array numeric sort
