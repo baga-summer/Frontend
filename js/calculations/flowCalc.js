@@ -252,7 +252,7 @@ function calcAll() {
             document.getElementById("staticPressure").innerText = height;
         }
 
-	alert("Ger ej ett dugligt värde");
+        alert("Ger ej ett dugligt värde");
     } else {
         document.getElementById("staticPressure").innerText = height;
         document.getElementById("flowSpeed").innerText = roundVel;
