@@ -155,74 +155,74 @@ const calculations = {
         return lostPress + height;
     },
 
-	/*
-	 * Calculates the additional pressure loss when a pipe changes its diameter.
-	 *
-	 * @param {INTEGER} Value that represents size of the pipe before the joint.
-	 * @param {INTEGER} Value that represents size of the pipe after the joint.
-	 * @param {INTEGER} Value that represents the speed of fluid in the pipe before the
-	 *                  t-connection.
-	 * @return {INTEGER} Value that represents the additional pressure loss because
-	 *                   of the connection.
-	 * The formula was found at https://www.pumpportalen.se/pumphandboken/11-2-rorstromningsforluster/
-	 * */
-	sizeLoss: (firstSize, secondSize, speed) => {
-		let koef = 0;
-		let factor = secondSize / firstSize;
+    /*
+     * Calculates the additional pressure loss when a pipe changes its diameter.
+     *
+     * @param {INTEGER} Value that represents size of the pipe before the joint.
+     * @param {INTEGER} Value that represents size of the pipe after the joint.
+     * @param {INTEGER} Value that represents the speed of fluid in the pipe before the
+     *                  t-connection.
+     * @return {INTEGER} Value that represents the additional pressure loss because
+     *                   of the connection.
+     * The formula was found at https://www.pumpportalen.se/pumphandboken/11-2-rorstromningsforluster/
+     * */
+    sizeLoss: (firstSize, secondSize, speed) => {
+        let koef = 0;
+        let factor = secondSize / firstSize;
 
-		if (firstSize < secondSize) {
-			if (factor <= 1.5) {
-				koef = 0.3;
-			} else if (factor <= 2) {
-				koef = 0.6;
-			} else if (factor <= 2.5) {
-				koef = 0.7;
-			} else if (factor <= 10) {
-				koef = 1;
-			}
-		} else {
-			if (factor <= 0.4) {
-				koef = 0.4;
-			} else if (factor <= 0.6) {
-				koef = 0.3;
-			} else if (factor <= 0.8) {
-				koef = 0.2;
-			} else if (factor <= 1) {
-				koef = 0;
-			}
-		}
+        if (firstSize < secondSize) {
+            if (factor <= 1.5) {
+                koef = 0.3;
+            } else if (factor <= 2) {
+                koef = 0.6;
+            } else if (factor <= 2.5) {
+                koef = 0.7;
+            } else if (factor <= 10) {
+                koef = 1;
+            }
+        } else {
+            if (factor <= 0.4) {
+                koef = 0.4;
+            } else if (factor <= 0.6) {
+                koef = 0.3;
+            } else if (factor <= 0.8) {
+                koef = 0.2;
+            } else if (factor <= 1) {
+                koef = 0;
+            }
+        }
 
-		let loss = koef * ((speed * speed)/2*9.81);
+        let loss = koef * ((speed * speed)/2*9.81);
 
-		return loss;
-	},
+        return loss;
+    },
 
-	/*
-	 * Calculates the additional pressure loss when a pipe is bent 90 degrees
-	 *
-	 * @param {INTEGER} Value that represents circumference of the bend in the
-	 * 					pipe.
-	 * @param {INTEGER} Value that represents inner diameter of the pipe
-	 * @param {INTEGER} Value that represents the speed of fluid in the pipe
-	 * 					before the bend.
-	 *
-	 * @return {INTEGER} Value that represents the additional pressure loss because
-	 *                   of the bend.
-	 * The formula was found at https://www.pumpportalen.se/pumphandboken/11-2-rorstromningsforluster/
-	 * */
-	pipeBend: (bendCircum, innerDiameter, speed) => {
-		let koef = 0;
+    /*
+     * Calculates the additional pressure loss when a pipe is bent 90 degrees
+     *
+     * @param {INTEGER} Value that represents circumference of the bend in the
+     * 					pipe.
+     * @param {INTEGER} Value that represents inner diameter of the pipe
+     * @param {INTEGER} Value that represents the speed of fluid in the pipe
+     * 					before the bend.
+     *
+     * @return {INTEGER} Value that represents the additional pressure loss because
+     *                   of the bend.
+     * The formula was found at https://www.pumpportalen.se/pumphandboken/11-2-rorstromningsforluster/
+     **/
+    pipeBend: (bendCircum, innerDiameter, speed) => {
+        let koef = 0;
 
-		if (bendCircum > (4 * innerDiameter)) {
-			koef = 0.2;
-		} else if (bendCircum == innerDiameter) {
-			koef = 0.4;
-		}
+        if (bendCircum > (4 * innerDiameter)) {
+            koef = 0.2;
+        } else if (bendCircum == innerDiameter) {
+            koef = 0.4;
+        }
 
-		let loss = koef * ((speed * speed)/2*9.81);
+        let loss = koef * ((speed * speed)/2*9.81);
 
-		return loss;
-	}
+        return loss;
+    }
 
 };
 
