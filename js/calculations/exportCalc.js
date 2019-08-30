@@ -66,17 +66,7 @@ const calculations = {
         return Math.pow(x, 2);
     },
 
-    /**
-     * log10 - Calculates X log10.
-     *
-     * @param {number} Value to log10
-     *
-     * @return {number} Result of value log10
-     *
-     */
-    log10: (x) => {
-        return Math.LOG10E * Math.log(x);
-    },
+
     /**
      * log10 - Calculates X log10.
      *
@@ -164,7 +154,8 @@ const calculations = {
      *                  t-connection.
      * @return {INTEGER} Value that represents the additional pressure loss because
      *                   of the connection.
-     * The formula was found at https://www.pumpportalen.se/pumphandboken/11-2-rorstromningsforluster/
+     * The formula was found at https://www.pumpportalen.se/pumphandboken/
+     * 11-2-rorstromningsforluster/
      * */
     sizeLoss: (firstSize, secondSize, speed) => {
         let koef = 0;
@@ -208,7 +199,8 @@ const calculations = {
      *
      * @return {INTEGER} Value that represents the additional pressure loss because
      *                   of the bend.
-     * The formula was found at https://www.pumpportalen.se/pumphandboken/11-2-rorstromningsforluster/
+     * The formula was found at https://www.pumpportalen.se/pumphandboken/
+     * 11-2-rorstromningsforluster/
      **/
     pipeBend: (bendCircum, innerDiameter, speed) => {
         let koef = 0;
