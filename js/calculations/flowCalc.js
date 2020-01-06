@@ -264,6 +264,22 @@ function calcAll() {
 }
 
 /**
+ * show_rho - shows the current rho value and lets the user change it as the
+ * user sees fit.
+ *
+ * @returns {void}
+ */
+
+function show_rho() {
+    var tmp = document.getElementById("mu");
+    if (tmp.style.display === "none") {
+        tmp.style.display = "block";
+    } else {
+        tmp.style.display = "none";
+    }
+}
+
+/**
  * getPumps - Fetches all the pumps from the database.
  *
  * @param {number} Height
