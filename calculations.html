@@ -55,8 +55,9 @@
                         </select>
                     </span>
                     <span class="form-element-pair">
-                        <label for="mu" id="muLabel">Råhetstal</label><br>
-                        <input class="number-input" data-digits-only
+                        <input class="button" type="button" name="submit"
+                        id="mu_botton" value="Råhetstal" onclick="show_rho();">
+                        <input class="number-input" style="display:none" data-digits-only
                             step="0.001" type="number" id="mu"
                             name="mu"
                             value="0.1" onkeypress="enterPressed(this, event);">&nbsp; mm
