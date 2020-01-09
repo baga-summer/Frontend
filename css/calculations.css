@@ -98,6 +98,10 @@ label {
 }
 
 #mu {
+    max-width: 3rem;
+}
+
+#mu {
     width: 100px !important;
 }
 
