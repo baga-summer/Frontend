@@ -98,11 +98,7 @@ label {
 }
 
 #mu {
-    max-width: 3rem;
-}
-
-#mu {
-    width: 100px !important;
+    width: 110px !important;
 }
 
 .pump-suggestions {
